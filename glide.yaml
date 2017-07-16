@@ -1,0 +1,15 @@
+package: github.com/kohkimakimoto/crun
+import:
+- package: github.com/Songmu/wrapcommander
+- package: github.com/cjoudrey/gluahttp
+- package: github.com/kballard/go-shellquote
+- package: github.com/kohkimakimoto/gluaenv
+- package: github.com/kohkimakimoto/gluafs
+- package: github.com/kohkimakimoto/gluatemplate
+- package: github.com/kohkimakimoto/gluayaml
+- package: github.com/mattn/go-shellwords
+- package: github.com/otm/gluash
+- package: github.com/urfave/cli
+- package: github.com/yuin/gluare
+- package: github.com/yuin/gopher-lua
+- package: layeh.com/gopher-json

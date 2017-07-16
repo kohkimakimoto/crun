@@ -1,0 +1,225 @@
+#!/bin/sh
+_=[[
+exec crun --lua "$0" "$@"
+]]
+-- The following code is written in Lua.
+
+local json = require "json"
+local http = require "http"
+
+-- Functions
+local function parseCSVLine(line) 
+    local res = {}
+    local pos = 1
+    sep = sep or ','
+    while true do 
+        local c = string.sub(line,pos,pos)
+        if (c == "") then break end
+        local startp,endp = string.find(line, ',', pos)
+        if (startp) then 
+            table.insert(res, string.sub(line, pos, startp-1))
+            pos = endp + 1
+        else
+            -- no separator found -> use rest of string and terminate
+            table.insert(res, string.sub(line, pos))
+            break
+        end 
+    end
+    return res
+end
+
+local function hasValue(tab, val)
+    for i, v in ipairs(tab) do
+        if v == val then
+            return true
+        end
+    end
+    return false
+end
+
+-- Parse options loosely. Example: '-a=one --aa=two -b three --bb four'. Do NOT support boolean option.
+local options = {}
+for i, v in ipairs(arg) do
+    if string.sub(v, 1, 2) == "--" or string.sub(v, 1, 1) == "-" then
+        local l = 2
+        if string.sub(v, 1, 2) == "--" then
+            l = 3
+        end
+
+        local x = string.find(v, "=", 1, true)
+        if x then 
+            options[string.sub(v, l, x-1)] = string.sub(v, x+1)
+        else
+            local _, vv = next(arg, i)
+            options[string.sub(v, l)] = vv
+        end
+    end
+end
+
+if not os.getenv("CRUN_HANDLER_TYPE") then 
+    print([[Usage: crun-handler-teams
+
+Crun handler for sending a report to microsoft teams.
+
+Options:
+  --url <URL>                     Incoming Webhook URL. This option is required.
+  --text <text>                   Text. Default 'Reported by crun-handler-teams'.
+  --color|--themeColor <color>    Color code. (ex '32B232'.
+  --items <items>                 Select reporting items by Comma-Separated Values. Default 'all'.
+                                  Example: Stdout,Stderr,ExitCode
+                                  Supported items:
+                                    Command
+                                    CommandArgs
+                                    Tag
+                                    Output
+                                    Stdout
+                                    Stderr
+                                    ExitCode
+                                    Result
+                                    Pid
+                                    StartAt
+                                    EndAt
+                                    Hostname
+                                    SystemTime
+                                    UserTime
+
+Examples:
+  crun --post='crun-handler-teams --url=https://outlook.office.com/webhook/xxxxx' -- echo helloworld!
+
+Description:
+  This command must be used as CRUN (https://github.com/kohkimakimoto/crun) handler.
+
+]])
+    os.exit(1)
+end
+
+local report = json.decode(io.read("*a"))
+
+-- Incoming Webhook URL
+local url        = options.url or error("require '--url'")
+local title      = options.title
+local text       = options.text or "Reported by crun-handler-teams"
+local themeColor = options.themeColor or options.color 
+local items      = parseCSVLine(options.items or 'all')
+
+local facts = {}
+if report.command and (hasValue(items, 'all') or hasValue(items, 'Command'))then
+    table.insert(facts, {
+        name = "Command",
+        value = report.command,
+    })
+end
+
+if report.commandArgs and (hasValue(items, 'all') or hasValue(items, 'CommandArgs'))then
+    table.insert(facts, {
+        name = "CommandArgs",
+        value = json.encode(report.commandArgs),
+    })
+end
+
+if report.tag and (hasValue(items, 'all') or hasValue(items, 'Tag'))then
+    table.insert(facts, {
+        title = "Tag",
+        value = report.tag,
+    })
+end
+
+if report.output and (hasValue(items, 'all') or hasValue(items, 'Output'))then
+    table.insert(facts, {
+        name = "Output",
+        value = report.output,
+    })
+end
+
+if report.stdout and (hasValue(items, 'all') or hasValue(items, 'Stdout'))then
+    table.insert(facts, {
+        name = "Stdout",
+        value = report.stdout,
+    })
+end
+
+if report.stderr and (hasValue(items, 'all') or hasValue(items, 'Stderr'))then
+    table.insert(facts, {
+        name = "Stderr",
+        value = report.stderr,
+    })
+end
+
+if report.exitCode and (hasValue(items, 'all') or hasValue(items, 'ExitCode'))then
+    table.insert(facts, {
+        name = "ExitCode",
+        value = report.exitCode,
+    })
+end
+
+if report.result and (hasValue(items, 'all') or hasValue(items, 'Result'))then
+    table.insert(facts, {
+        name = "Result",
+        value = report.result,
+    })
+end
+
+if report.pid and (hasValue(items, 'all') or hasValue(items, 'Pid'))then
+    table.insert(facts, {
+        name = "Pid",
+        value = report.pid,
+    })
+end
+
+if report.startAt and (hasValue(items, 'all') or hasValue(items, 'StartAt'))then
+    table.insert(facts, {
+        name = "StartAt",
+        value = report.startAt,
+    })
+end
+
+if report.endAt and (hasValue(items, 'all') or hasValue(items, 'EndAt'))then
+    table.insert(facts, {
+        name = "EndAt",
+        value = report.endAt,
+    })
+end
+
+if report.hostname and (hasValue(items, 'all') or hasValue(items, 'Hostname'))then
+    table.insert(facts, {
+        name = "Hostname",
+        value = report.hostname,
+    })
+end
+
+if report.systemTime and (hasValue(items, 'all') or hasValue(items, 'SystemTime'))then
+    table.insert(facts, {
+        name = "SystemTime",
+        value = report.systemTime,
+    })
+end
+
+if report.userTime and (hasValue(items, 'all') or hasValue(items, 'UserTime'))then
+    table.insert(facts, {
+        name = "UserTime",
+        value = report.userTime,
+    })
+end
+
+-- see https://docs.microsoft.com/en-us/outlook/actionable-messages/card-reference
+local msg = json.encode({
+    ['@type'] = "MessageCard",
+    ['@context'] = "http://schema.org/extensions",
+    text = text,
+    themeColor = themeColor,
+    sections = {
+        {
+            facts = facts,
+        }
+    },
+})
+
+local resp, err = http.post(url, {
+    headers = {
+        ['Content-type'] = "application/json"
+    },
+    body = msg,
+})
+if err then
+    error(err)
+end
