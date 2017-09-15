@@ -121,7 +121,7 @@ end
 
 if report.tag and (hasValue(items, 'all') or hasValue(items, 'Tag'))then
     table.insert(facts, {
-        title = "Tag",
+        name = "Tag",
         value = report.tag,
     })
 end
