@@ -3,7 +3,7 @@ set -eu
 
 # override config
 export PRODUCT_NAME="crun-handlers"
-export PRODUCT_VERSION="0.2.0"
+export PRODUCT_VERSION="0.2.1"
 
 echo "Running packaging script in '$DOCKER_IMAGE' container..."
 echo "PRODUCT_NAME: $PRODUCT_NAME"
