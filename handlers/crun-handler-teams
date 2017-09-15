@@ -210,7 +210,7 @@ local msg = nil
 
 if format == 'text' then
     for _, fact in ipairs(facts) do
-        if fact.value == '' then
+        if fact.value == nil or fact.value == '' then
             text = text .. "\n## " .. fact.name .. "\n\n" 
         else
             text = text .. "\n## " .. fact.name .. "\n`" .. fact.value .. "`\n" 
