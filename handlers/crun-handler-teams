@@ -64,7 +64,8 @@ Crun handler for sending a report to microsoft teams.
 Options:
   --url <URL>                     Incoming Webhook URL. This option is required.
   --text <text>                   Text. Default 'Reported by crun-handler-teams'.
-  --color|--themeColor <color>    Color code. (ex '32B232'.
+  --color|--theme-color <color>   Color code. (ex '32B232'.
+  --format <format>               Message format. Support 'text' or 'facts'. Default 'text'
   --items <items>                 Select reporting items by Comma-Separated Values. Default 'all'.
                                   Example: Stdout,Stderr,ExitCode
                                   Supported items:
@@ -99,7 +100,8 @@ local report = json.decode(io.read("*a"))
 local url        = options.url or error("require '--url'")
 local title      = options.title
 local text       = options.text or "Reported by crun-handler-teams"
-local themeColor = options.themeColor or options.color 
+local themeColor = options['theme-color'] or options.color 
+local format     = options.format or 'text'
 local items      = parseCSVLine(options.items or 'all')
 
 local facts = {}
@@ -201,18 +203,41 @@ if report.userTime and (hasValue(items, 'all') or hasValue(items, 'UserTime'))th
     })
 end
 
+-- see https://msdn.microsoft.com/en-us/microsoft-teams/connectors
 -- see https://docs.microsoft.com/en-us/outlook/actionable-messages/card-reference
-local msg = json.encode({
-    ['@type'] = "MessageCard",
-    ['@context'] = "http://schema.org/extensions",
-    text = text,
-    themeColor = themeColor,
-    sections = {
-        {
-            facts = facts,
-        }
-    },
-})
+
+local msg = nil
+
+if format == 'text' then
+    for _, fact in ipairs(facts) do
+        if fact.value == '' then
+            text = text .. "\n## " .. fact.name .. "\n\n" 
+        else
+            text = text .. "\n## " .. fact.name .. "\n`" .. fact.value .. "`\n" 
+        end
+    end
+
+    msg = json.encode({
+        ['@type'] = "MessageCard",
+        ['@context'] = "http://schema.org/extensions",
+        text = text,
+        themeColor = themeColor,
+    })
+elseif format == 'facts' then
+    msg = json.encode({
+        ['@type'] = "MessageCard",
+        ['@context'] = "http://schema.org/extensions",
+        text = text,
+        themeColor = themeColor,
+        sections = {
+            {
+                facts = facts,
+            }
+        },
+    })
+else
+    error('unsupported format: '..format)
+end
 
 local resp, err = http.post(url, {
     headers = {
