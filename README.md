@@ -6,17 +6,18 @@ The main feature of crun is to append hook handlers to command execution. It is 
 
 Table of Contents
 
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Example](#example)
-  * [Handlers](#handlers)
-  * [Execution Sequence](#execution-sequence)
-  * [Result JSON](#result-json)
-  * [Logging](#logging)
-  * [Lua Interpreter](#lua-interpreter)
-  * [Options](#options)
-* [Author](#author)
-* [License](#license)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Example](#example)
+    - [Handlers](#handlers)
+    - [Execution Sequence](#execution-sequence)
+    - [Result JSON](#result-json)
+    - [Logging](#logging)
+    - [Lua Interpreter](#lua-interpreter)
+      - [Example](#example-1)
+    - [Options](#options)
+  - [Author](#author)
+  - [License](#license)
 
 ## Installation
 
@@ -68,11 +69,11 @@ I implemented some handlers. Please see [handlers](https://github.com/kohkimakim
 Crun supports several hook points: `pre`, `notice`, `success`, `failure` and `post`. The following table defines execution sequence:
 
 1. Run `pre` handlers
-1. Start the command
-1. Run `notice` handlers (non-blocking)
-1. Wait to finish the command
-1. Run `success` or `failure` handlers
-1. Run `post` handlers
+2. Start the command
+3. Run `notice` handlers (non-blocking)
+4. Wait to finish the command
+5. Run `success` or `failure` handlers
+6. Run `post` handlers
 
 ### Result JSON
 
@@ -158,48 +159,9 @@ The first four lines are trick to use [shebang](https://en.wikipedia.org/wiki/Sh
 
 See [crun-handler-slack](https://github.com/kohkimakimoto/crun/tree/master/handlers/crun-handler-slack). It's a good example.
 
-
 ### Options
 
-* `--pre`:
-
-* `--pre-async`:
-
-* `--notice`:
-
-* `--notice-async`:
-
-* `--success`:
-
-* `--success-async`:
-
-* `--failure`:
-
-* `--failure-async`:
-
-* `--post`:
-
-* `--post-async`:
-
-* `--stdout-file`:
-
-* `--stderr-file`:
-
-* `--log-file`:
-
-* `--log-prefix`:
-
-* `--tag`:
-
-* `--quiet, -q`:
-
-* `--working-directory, -w`:
-
-* `--env, -e`:
-
-* `--lua`:
-
-See also: `crun -h`.
+See: `crun -h`.
 
 ## Author
 
