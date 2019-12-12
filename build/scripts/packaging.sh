@@ -20,7 +20,7 @@ rm -rf $outputs_dir/packaging/*
 
 echo "Building RPM packages..."
 cd $scripts_dir/rpm
-for image in 'kohkimakimoto/rpmbuild:el5' 'kohkimakimoto/rpmbuild:el6' 'kohkimakimoto/rpmbuild:el7'; do
+for image in 'kohkimakimoto/rpmbuild:el7'; do
     docker run \
         --env DOCKER_IMAGE=${image}  \
         --env PRODUCT_NAME=${PRODUCT_NAME}  \
@@ -31,21 +31,6 @@ for image in 'kohkimakimoto/rpmbuild:el5' 'kohkimakimoto/rpmbuild:el6' 'kohkimak
         --rm \
         ${image} \
         bash ./build/scripts/rpm/run.sh
-done
-
-echo "Building RPM packages (crun-handlers)..."
-cd $scripts_dir/rpm_handlers
-for image in 'kohkimakimoto/rpmbuild:el5' 'kohkimakimoto/rpmbuild:el6' 'kohkimakimoto/rpmbuild:el7'; do
-    docker run \
-        --env DOCKER_IMAGE=${image}  \
-        --env PRODUCT_NAME=${PRODUCT_NAME}  \
-        --env PRODUCT_VERSION=${PRODUCT_VERSION}  \
-        --env COMMIT_HASH=${COMMIT_HASH}  \
-        -v $repo_dir:/tmp/repo \
-        -w /tmp/repo \
-        --rm \
-        ${image} \
-        bash ./build/scripts/rpm_handlers/run.sh
 done
 
 cd "$repo_dir"
