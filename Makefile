@@ -55,16 +55,6 @@ cleantools:
 
 .PHONY:deps
 deps: ## Install dependences.
-	PATH=$(CURDIR)/.go-packages/bin:${PATH} && dep ensure
-
-.PHONY:updatedeps
-updatedeps: ## update all dependences.
-	rm -rf Gopkg.*
-	rm -rf vendor
-	dep init
-	dep ensure
-
-printenv:
-	printenv
+	go mod tidy
 
 
