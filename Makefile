@@ -1,10 +1,11 @@
-.PHONY:help
 .DEFAULT_GOAL := help
 
-export GO111MODULE=off
+export GO111MODULE := on
+export PATH := $(CURDIR)/.go-packages/bin:$(PATH)
 
 # This is a magic code to output help message at default
 # see https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+.PHONY:help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
@@ -43,11 +44,14 @@ packaging: ## Create packages (now support RPM only)
 .PHONY: installtools
 installtools: ## Install dev tools
 	GOPATH=$(CURDIR)/.go-packages && \
-      go get -u github.com/mattn/go-bindata/... && \
-      go get -u github.com/golang/dep/cmd/dep && \
-      go get -u github.com/mitchellh/gox && \
-      go get -u github.com/axw/gocov/gocov && \
-      go get -u gopkg.in/matm/v1/gocov-html
+      go get github.com/mitchellh/gox && \
+      go get github.com/axw/gocov/gocov && \
+      go get github.com/matm/gocov-html && \
+      go clean -modcache
+
+.PHONY: cleantools
+cleantools:
+	GOPATH=$(CURDIR)/.go-packages && go clean -modcache && rm -rf $(CURDIR)/.go-packages
 
 .PHONY:deps
 deps: ## Install dependences.
@@ -60,5 +64,7 @@ updatedeps: ## update all dependences.
 	dep init
 	dep ensure
 
+printenv:
+	printenv
 
 
