@@ -12,13 +12,17 @@ import (
 )
 
 type Crun struct {
+	Report *structs.Report
 	CommandArgs   []string
 	Tag    string
-	Report *structs.Report
+	WorkingDirectory     string
+	Environments   map[string]string
 }
 
 func New() *Crun {
-	return &Crun{}
+	return &Crun{
+		Environments:    map[string]string{},
+	}
 }
 
 func (c *Crun) Run() (*structs.Report, error) {
@@ -36,13 +40,27 @@ func (c *Crun) Run() (*structs.Report, error) {
 		return r, errors.New("requires a command to execute")
 	}
 
+	if c.WorkingDirectory != "" {
+		if err := os.Chdir(c.WorkingDirectory); err != nil {
+			return r, fmt.Errorf("couldn't change working directory to '%s': %s.", c.WorkingDirectory, err.Error())
+		}
+	}
+
+	for k, v := range c.Environments {
+		os.Setenv(k, v)
+	}
+
 	cmd := exec.Command(c.CommandArgs[0], c.CommandArgs[1:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr= os.Stderr
 
+	r.StartAt = now()
 	if err := cmd.Start(); err != nil {
 		return r, err
+	}
+	if cmd.Process != nil {
+		r.Pid = cmd.Process.Pid
 	}
 
 	err := cmd.Wait()
