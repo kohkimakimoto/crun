@@ -17,29 +17,19 @@ import (
 )
 
 type Crun struct {
+	Config                 *Config
 	Report                 *structs.Report
 	CommandArgs            []string
-	PreHandlers            []string
-	NoticeHandlers         []string
-	PostHandlers           []string
-	SuccessHandlers        []string
-	FailureHandlers        []string
 	StdoutWriter           io.Writer
 	StderrWriter           io.Writer
-	LogFile                string
-	LogPrefix              string
-	Tag                    string
-	Quiet                  bool
-	WorkingDirectory       string
-	Environments           map[string]string
 	preHandlersAreExecuted bool
 }
 
 func New() *Crun {
 	return &Crun{
+		Config:       newConfig(),
 		StdoutWriter: os.Stdout,
 		StderrWriter: os.Stderr,
-		Environments: map[string]string{},
 	}
 }
 
@@ -48,43 +38,43 @@ func (c *Crun) Run() (*structs.Report, error) {
 	r := &structs.Report{
 		Command:     shellquote.Join(c.CommandArgs...),
 		CommandArgs: c.CommandArgs,
-		Tag:         c.Tag,
+		Tag:         c.Config.Tag,
 		ExitCode:    -1,
 		Hostname:    hostname,
 	}
 	c.Report = r
 
+	if err := c.Config.ParseEnvironment(); err != nil {
+		return r, err
+	}
+
 	if c.CommandArgs == nil || len(c.CommandArgs) == 0 {
 		return r, errors.New("requires a command to execute")
 	}
 
-	if c.Quiet {
+	if c.Config.Quiet {
 		c.StdoutWriter = ioutil.Discard
 	}
 
-	if c.WorkingDirectory != "" {
-		if err := os.Chdir(c.WorkingDirectory); err != nil {
-			return r, fmt.Errorf("couldn't change working directory to '%s': %s.", c.WorkingDirectory, err.Error())
+	if c.Config.WorkingDirectory != "" {
+		if err := os.Chdir(c.Config.WorkingDirectory); err != nil {
+			return r, fmt.Errorf("couldn't change working directory to '%s': %s.", c.Config.WorkingDirectory, err.Error())
 		}
 	}
 
-	for k, v := range c.Environments {
+	for k, v := range c.Config.EnvironmentMap {
 		os.Setenv(k, v)
 	}
 
 	var logWriter io.Writer
-	if c.LogFile != "" {
-		f, err := os.OpenFile(c.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	if c.Config.LogFile != "" {
+		f, err := os.OpenFile(c.Config.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
 			c.handleErrorBeforeRunning(r, err.Error())
 			return r, err
 		}
 
-		if c.LogPrefix != "" {
-			logWriter = newPrefixWriter(f, c)
-		} else {
-			logWriter = f
-		}
+		logWriter = newLogWriter(f, c)
 	}
 
 	if logWriter != nil {
@@ -209,28 +199,28 @@ func (c *Crun) runPreHandlers(r *structs.Report) {
 	}
 
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.PreHandlers, b, "pre")
+	c.runHandlers(c.Config.PreHandlers, b, "pre")
 	c.preHandlersAreExecuted = true
 }
 
 func (c *Crun) runNoticeHandlers(r *structs.Report) {
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.NoticeHandlers, b, "notice")
+	c.runHandlers(c.Config.NoticeHandlers, b, "notice")
 }
 
 func (c *Crun) runPostHandlers(r *structs.Report) {
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.PostHandlers, b, "post")
+	c.runHandlers(c.Config.PostHandlers, b, "post")
 }
 
 func (c *Crun) runSuccessHandlers(r *structs.Report) {
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.SuccessHandlers, b, "success")
+	c.runHandlers(c.Config.SuccessHandlers, b, "success")
 }
 
 func (c *Crun) runFailureHandlers(r *structs.Report) {
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.FailureHandlers, b, "failure")
+	c.runHandlers(c.Config.FailureHandlers, b, "failure")
 }
 
 func (c *Crun) runHandlers(handlers []string, json []byte, handlerType string) {

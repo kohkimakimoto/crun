@@ -1,3 +1,5 @@
+github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
+github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Songmu/wrapcommander v0.1.0 h1:y8/yk9/PHT983weH+ehZIOJ7JtwAlI1AkfUpUNCj1SY=
 github.com/Songmu/wrapcommander v0.1.0/go.mod h1:EC2y4OnN8PkdMnaCwcSzItewq+f0yqUvS30kcS4vmn0=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
@@ -5,6 +7,8 @@ github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5P
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
 github.com/cjoudrey/gluahttp v0.0.0-20190104103309-101c19a37344 h1:nTK6O2RY1nHC4jNEJd1nixVP7ygY3QE4CNxCX07dHKU=
 github.com/cjoudrey/gluahttp v0.0.0-20190104103309-101c19a37344/go.mod h1:X97UjDTXp+7bayQSFZk2hPvCTmTZIicUjZQRtkwgAKY=
+github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d h1:U+s90UTSYgptZMwQh2aRr3LuazLJIa+Pg3Kc1ylSYVY=
+github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsrgA7czyZG/E6dU=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 h1:Z9n2FFNUXsshfwJMBgNA0RU6/i7WVaAegv3PtuIHPMs=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51/go.mod h1:CzGEWj7cYgsdH8dAjBGEr58BoE7ScuLd+fwFZ44+/x8=
 github.com/kohkimakimoto/gluaenv v0.0.0-20160815032729-2888db6bbe38 h1:biwbB8L9cu79c7DxV925AKHh0lg+cr3Gk6QNbv1pF0E=
@@ -15,8 +19,17 @@ github.com/kohkimakimoto/gluatemplate v0.0.0-20160815033744-d9e2c9d6b00f h1:CXJz
 github.com/kohkimakimoto/gluatemplate v0.0.0-20160815033744-d9e2c9d6b00f/go.mod h1:mepZlGlueX0FYzgC3KQMEuBBQuaAvdp8RUY+ZEe2fbI=
 github.com/kohkimakimoto/gluayaml v0.0.0-20160815032708-6fe413d49d73 h1:e2UU76WBjv6W0QUuPHe2QfSAXLR1kouek1fcSUtnSrk=
 github.com/kohkimakimoto/gluayaml v0.0.0-20160815032708-6fe413d49d73/go.mod h1:I+YgUp/uc0hF+H4RuQjR+uzDJNjUz7Sm21e63UCLWWQ=
+github.com/mattn/go-shellwords v1.0.6 h1:9Jok5pILi5S1MnDirGVTufYGtksUs/V2BWUP3ZkeUUI=
+github.com/mattn/go-shellwords v1.0.6/go.mod h1:3xCvwCdWdlDJUrvuMn7Wuy9eWs4pE8vqg+NOMyg4B2o=
 github.com/otm/gluash v0.0.0-20151226163409-e145c563986f h1:+gQ2hneEnD00TaMTBYNkOIHt5pOVLA+mvCbXYj2uoNc=
 github.com/otm/gluash v0.0.0-20151226163409-e145c563986f/go.mod h1:hOW70qJVUnf+EYK21e44kaJDMTJWXkvyodn7JMBS31Y=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/russross/blackfriday/v2 v2.0.1 h1:lPqVAte+HuHNfhJ/0LC98ESWRz8afy9tM/0RK8m9o+Q=
+github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
+github.com/shurcooL/sanitized_anchor_name v1.0.0 h1:PdmoCO6wvbs+7yrJyMORt4/BmY5IYyJwS/kOiWx8mHo=
+github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
+github.com/urfave/cli v1.22.2 h1:gsqYFH8bb9ekPA12kRo0hfjngWQjkJPlN9R0N78BoUo=
+github.com/urfave/cli v1.22.2/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/yookoala/realpath v1.0.0 h1:7OA9pj4FZd+oZDsyvXWQvjn5oBdcHRTV44PpdMSuImQ=
 github.com/yookoala/realpath v1.0.0/go.mod h1:gJJMA9wuX7AcqLy1+ffPatSCySA1FQ2S8Ya9AIoYBpE=
 github.com/yuin/gluare v0.0.0-20170607022532-d7c94f1a80ed h1:I1vcLHWU9m30rA90rMrKPu0eD3NDA4FBlkB8WMaDyUw=

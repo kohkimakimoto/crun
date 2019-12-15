@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/Songmu/wrapcommander"
 	"github.com/kohkimakimoto/crun/crun"
+	"log"
 	"os"
-	"strings"
 )
 
 func main() {
@@ -30,16 +30,18 @@ func realMain() (status int) {
 			status = 1
 		}
 	}()
-
+	log.Print()
 	// parse flags...
 	var optVersion, optQuiet, optLua bool
-	var optTag, optWd, optLogFile, optLogPrefix string
+	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile string
 	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
 
 	flag.StringVar(&optTag, "t", "", "")
 	flag.StringVar(&optTag, "tag", "", "")
 	flag.StringVar(&optWd, "w", "", "")
 	flag.StringVar(&optWd, "working-directory", "", "")
+	flag.StringVar(&optConfigFile, "c", "", "")
+	flag.StringVar(&optConfigFile, "config-file", "", "")
 	flag.Var(&optEnv, "e", "")
 	flag.Var(&optEnv, "env", "")
 	flag.BoolVar(&optVersion, "v", false, "")
@@ -113,25 +115,45 @@ Options:
 	}
 
 	c := crun.New()
-	c.CommandArgs = flag.Args()
-	c.Tag = optTag
-	c.WorkingDirectory = optWd
-	c.PreHandlers = optPre
-	c.NoticeHandlers = optNotice
-	c.SuccessHandlers = optSuccess
-	c.FailureHandlers = optFailure
-	c.PostHandlers = optPost
-	c.LogFile = optLogFile
-	c.LogPrefix = optLogPrefix
-	c.Quiet = optQuiet
 
-	for _, e := range optEnv {
-		splitString := strings.SplitN(e, "=", 2)
-		if len(splitString) != 2 {
-			fmt.Fprintf(os.Stderr, "invalid environment variable format '%s'. must be 'KEY=VALUE'.\n", e)
-			return 1
-		}
-		c.Environments[splitString[0]] = splitString[1]
+	if err := loadConfigFile(c, optConfigFile); err != nil {
+		fmt.Fprintf(os.Stderr, "%v", err)
+		return 1
+	}
+
+	c.CommandArgs = flag.Args()
+	if optTag != "" {
+		c.Config.Tag = optTag
+	}
+	if optWd != "" {
+		c.Config.WorkingDirectory = optWd
+	}
+	if len(optPre) > 0 {
+		c.Config.PreHandlers = append(c.Config.PreHandlers, optPre...)
+	}
+	if len(optNotice) > 0 {
+		c.Config.NoticeHandlers = append(c.Config.NoticeHandlers, optNotice...)
+	}
+	if len(optSuccess) > 0 {
+		c.Config.SuccessHandlers = append(c.Config.SuccessHandlers, optSuccess...)
+	}
+	if len(optFailure) > 0 {
+		c.Config.FailureHandlers = append(c.Config.FailureHandlers, optFailure...)
+	}
+	if len(optPost) > 0 {
+		c.Config.PostHandlers = append(c.Config.PostHandlers, optPost...)
+	}
+	if optLogFile != "" {
+		c.Config.LogFile = optLogFile
+	}
+	if optLogPrefix != "" {
+		c.Config.LogPrefix = optLogPrefix
+	}
+	if optQuiet {
+		c.Config.Quiet = optQuiet
+	}
+	if len(optEnv) > 0 {
+		c.Config.Environment = append(c.Config.Environment, optEnv...)
 	}
 
 	r, err := c.Run()
@@ -141,4 +163,20 @@ Options:
 	}
 
 	return r.ExitCode
+}
+
+func loadConfigFile(c *crun.Crun, optConfigFile string ) error {
+	if optConfigFile != "" {
+		if err := c.Config.LoadConfigFile(optConfigFile); err != nil {
+			return fmt.Errorf("failed to open file: %s %v", optConfigFile, err)
+		}
+	} else {
+		// default config
+		if _, err := os.Stat(crun.DefaultConfigFile); err == nil {
+			if err := c.Config.LoadConfigFile(crun.DefaultConfigFile); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

@@ -8,24 +8,28 @@ import (
 	"time"
 )
 
-type prefixWriter struct {
+type logWriter struct {
 	writer    io.Writer
 	c         *Crun
 	midOfLine bool
 	m         *sync.Mutex
 }
 
-func newPrefixWriter(w io.Writer, c *Crun) *prefixWriter {
-	return &prefixWriter{
+func newLogWriter(w io.Writer, c *Crun) *logWriter {
+	return &logWriter{
 		writer: w,
 		c:      c,
 		m:      &sync.Mutex{},
 	}
 }
 
-func (w *prefixWriter) Write(buf []byte) (int, error) {
+func (w *logWriter) Write(buf []byte) (int, error) {
 	w.m.Lock()
 	defer w.m.Unlock()
+
+	if w.c.Config.LogPrefix == "" {
+		return w.writer.Write(buf)
+	}
 
 	var bb bytes.Buffer
 	for i, chr := range buf {
@@ -44,16 +48,16 @@ func (w *prefixWriter) Write(buf []byte) (int, error) {
 
 const ts = "2006-01-02T15:04:05.000Z07:00"
 
-func (w *prefixWriter) prefixBytes() []byte {
+func (w *logWriter) prefixBytes() []byte {
 	c := w.c
-	str := w.c.LogPrefix
+	str := w.c.Config.LogPrefix
 
 	t := time.Now()
 	tsstr := t.Format(ts)
 	str = strings.Replace(str, "%ts", tsstr, -1)
 	str = strings.Replace(str, "%timestamp", tsstr, -1)
-	str = strings.Replace(str, "%tag", c.Tag, -1)
-	str = strings.Replace(str, "%t", c.Tag, -1)
+	str = strings.Replace(str, "%tag", c.Config.Tag, -1)
+	str = strings.Replace(str, "%t", c.Config.Tag, -1)
 
 	return []byte(str)
 }
