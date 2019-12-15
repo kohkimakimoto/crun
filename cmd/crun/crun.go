@@ -32,7 +32,7 @@ func realMain() (status int) {
 	}()
 
 	// parse flags...
-	var optVersion, optQuiet bool
+	var optVersion, optQuiet, optLua bool
 	var optTag, optWd, optLogFile, optLogPrefix string
 	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
 
@@ -46,6 +46,7 @@ func realMain() (status int) {
 	flag.BoolVar(&optVersion, "version", false, "")
 	flag.BoolVar(&optQuiet, "q", false, "")
 	flag.BoolVar(&optQuiet, "quiet", false, "")
+	flag.BoolVar(&optLua, "lua", false, "")
 	flag.Var(&optPre, "pre", "")
 	flag.Var(&optNotice, "notice", "")
 	flag.Var(&optSuccess, "success", "")
@@ -90,6 +91,24 @@ Options:
 
 	if len(os.Args) <= 1 {
 		flag.Usage()
+		return 0
+	}
+
+	if optLua {
+		// run lua mode for extension script.
+		if flag.NArg() == 0 {
+			flag.Usage()
+			return 0
+		}
+
+		L := crun.NewLuaProcess()
+		L.ScriptFile = flag.Args()[0]
+
+		if err := L.Run(flag.Args()); err != nil {
+			fmt.Fprintf(os.Stderr, "%v", err)
+			return 1
+		}
+
 		return 0
 	}
 
