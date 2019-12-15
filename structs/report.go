@@ -39,13 +39,13 @@ type Report struct {
 	Output      string     `json:"output"`
 	Stdout      string     `json:"stdout"`
 	Stderr      string     `json:"stderr"`
-	ExitCode    int       `json:"exitCode,omitempty"`
+	ExitCode    int        `json:"exitCode,omitempty"`
 	Signaled    bool       `json:"signaled"`
 	Result      string     `json:"result"`
 	Hostname    string     `json:"hostname"`
-	Pid         int       `json:"pid,omitempty"`
+	Pid         int        `json:"pid,omitempty"`
 	StartAt     *time.Time `json:"startAt,omitempty"`
 	EndAt       *time.Time `json:"endAt,omitempty"`
-	SystemTime  float64   `json:"systemTime,omitempty"`
-	UserTime    float64   `json:"userTime,omitempty"`
+	SystemTime  float64    `json:"systemTime,omitempty"`
+	UserTime    float64    `json:"userTime,omitempty"`
 }

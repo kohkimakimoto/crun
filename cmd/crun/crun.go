@@ -32,9 +32,9 @@ func realMain() (status int) {
 	}()
 
 	// parse flags...
-	var optVersion bool
-	var optTag, optWd string
-	var optEnv stringSlice
+	var optVersion, optQuiet bool
+	var optTag, optWd, optLogFile, optLogPrefix string
+	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
 
 	flag.StringVar(&optTag, "t", "", "")
 	flag.StringVar(&optTag, "tag", "", "")
@@ -44,6 +44,15 @@ func realMain() (status int) {
 	flag.Var(&optEnv, "env", "")
 	flag.BoolVar(&optVersion, "v", false, "")
 	flag.BoolVar(&optVersion, "version", false, "")
+	flag.BoolVar(&optQuiet, "q", false, "")
+	flag.BoolVar(&optQuiet, "quiet", false, "")
+	flag.Var(&optPre, "pre", "")
+	flag.Var(&optNotice, "notice", "")
+	flag.Var(&optSuccess, "success", "")
+	flag.Var(&optFailure, "failure", "")
+	flag.Var(&optPost, "post", "")
+	flag.StringVar(&optLogFile, "log-file", "", "")
+	flag.StringVar(&optLogPrefix, "log-prefix", "", "")
 
 	flag.Usage = func() {
 		fmt.Println(`Usage: ` + crun.Name + ` [OPTIONS...] <COMMAND...>
@@ -55,11 +64,20 @@ Copyright (c) Kohki Makimoto <kohki.makimoto@gmail.com>
 The MIT License (MIT)
 
 Options:
-  -h, --help                 Show help
-  -v, --version              Print the version
-  -t, --tag                  Arbitrary tag of the job
+  -h, --help                 Show help.
+  -v, --version              Print the version.
+  -t, --tag                  Arbitrary tag of the job.
   -w, --working-directory    If specified, use the given directory as working directory. 
   -e, --env                  Set custom environment variables. ex) -e KEY=VALUE
+  --pre                      Set pre handler.
+  --notice                   Set notice handler.
+  --success                  Set success handler.
+  --failure                  Set failure handler.
+  --post                     Set post handler.
+  --log-file                 The file path to write merged output.
+  --log-prefix               The prefix for the merged output log. This option is used with '--log-file' option.
+  -q, --quiet                Suppress outputting to stdout.
+
 `)
 	}
 	flag.Parse()
@@ -79,6 +97,14 @@ Options:
 	c.CommandArgs = flag.Args()
 	c.Tag = optTag
 	c.WorkingDirectory = optWd
+	c.PreHandlers = optPre
+	c.NoticeHandlers = optNotice
+	c.SuccessHandlers = optSuccess
+	c.FailureHandlers = optFailure
+	c.PostHandlers = optPost
+	c.LogFile = optLogFile
+	c.LogPrefix = optLogPrefix
+	c.Quiet = optQuiet
 
 	for _, e := range optEnv {
 		splitString := strings.SplitN(e, "=", 2)
