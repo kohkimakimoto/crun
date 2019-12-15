@@ -27,14 +27,7 @@ func (p *LuaProcess) Run(args []string) error {
 	defer L.Close()
 	p.LState = L
 
-	L.PreloadModule("json", gluajson.Loader)
-	L.PreloadModule("fs", gluafs.Loader)
-	L.PreloadModule("yaml", gluayaml.Loader)
-	L.PreloadModule("template", gluatemplate.Loader)
-	L.PreloadModule("env", gluaenv.Loader)
-	L.PreloadModule("http", gluahttp.NewHttpModule(&http.Client{}).Loader)
-	L.PreloadModule("re", gluare.Loader)
-	L.PreloadModule("sh", gluash.Loader)
+	openLibs(L)
 
 	argtb := L.NewTable()
 	for i, v := range args {
@@ -48,4 +41,15 @@ func (p *LuaProcess) Run(args []string) error {
 	}
 
 	return nil
+}
+
+func openLibs(L *lua.LState) {
+	L.PreloadModule("json", gluajson.Loader)
+	L.PreloadModule("fs", gluafs.Loader)
+	L.PreloadModule("yaml", gluayaml.Loader)
+	L.PreloadModule("template", gluatemplate.Loader)
+	L.PreloadModule("env", gluaenv.Loader)
+	L.PreloadModule("http", gluahttp.NewHttpModule(&http.Client{}).Loader)
+	L.PreloadModule("re", gluare.Loader)
+	L.PreloadModule("sh", gluash.Loader)
 }

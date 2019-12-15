@@ -21,6 +21,7 @@ type Config struct {
 	WorkingDirectory string            `toml:"working_directory"`
 	Environment      []string          `toml:"environments"`
 	EnvironmentMap   map[string]string `toml:"-"`
+	InitByLua        string            `toml:"init_by_lua"`
 }
 
 func newConfig() *Config {

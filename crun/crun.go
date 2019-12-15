@@ -8,6 +8,7 @@ import (
 	"github.com/Songmu/wrapcommander"
 	"github.com/kballard/go-shellquote"
 	"github.com/kohkimakimoto/crun/structs"
+	lua "github.com/yuin/gopher-lua"
 	"io"
 	"io/ioutil"
 	"os"
@@ -18,6 +19,7 @@ import (
 
 type Crun struct {
 	Config                 *Config
+	L                      *lua.LState
 	Report                 *structs.Report
 	CommandArgs            []string
 	StdoutWriter           io.Writer
@@ -26,11 +28,19 @@ type Crun struct {
 }
 
 func New() *Crun {
+	L := lua.NewState()
+	openLibs(L)
+
 	return &Crun{
 		Config:       newConfig(),
+		L:            L,
 		StdoutWriter: os.Stdout,
 		StderrWriter: os.Stderr,
 	}
+}
+
+func (c *Crun) Close() {
+	c.L.Close()
 }
 
 func (c *Crun) Run() (*structs.Report, error) {
@@ -44,12 +54,18 @@ func (c *Crun) Run() (*structs.Report, error) {
 	}
 	c.Report = r
 
-	if err := c.Config.ParseEnvironment(); err != nil {
-		return r, err
+	if c.Config.InitByLua != ""{
+		if err := c.L.DoString(c.Config.InitByLua); err != nil {
+			return r, err
+		}
 	}
 
 	if c.CommandArgs == nil || len(c.CommandArgs) == 0 {
 		return r, errors.New("requires a command to execute")
+	}
+
+	if err := c.Config.ParseEnvironment(); err != nil {
+		return r, err
 	}
 
 	if c.Config.Quiet {

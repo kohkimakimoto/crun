@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/Songmu/wrapcommander"
 	"github.com/kohkimakimoto/crun/crun"
-	"log"
 	"os"
 )
 
@@ -30,7 +29,7 @@ func realMain() (status int) {
 			status = 1
 		}
 	}()
-	log.Print()
+
 	// parse flags...
 	var optVersion, optQuiet, optLua bool
 	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile string
@@ -115,6 +114,7 @@ Options:
 	}
 
 	c := crun.New()
+	defer c.Close()
 
 	if err := loadConfigFile(c, optConfigFile); err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
@@ -165,7 +165,7 @@ Options:
 	return r.ExitCode
 }
 
-func loadConfigFile(c *crun.Crun, optConfigFile string ) error {
+func loadConfigFile(c *crun.Crun, optConfigFile string) error {
 	if optConfigFile != "" {
 		if err := c.Config.LoadConfigFile(optConfigFile); err != nil {
 			return fmt.Errorf("failed to open file: %s %v", optConfigFile, err)
