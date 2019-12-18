@@ -2,6 +2,7 @@ package crun
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,22 +10,24 @@ import (
 	"github.com/kballard/go-shellquote"
 	"github.com/kohkimakimoto/crun/structs"
 	lua "github.com/yuin/gopher-lua"
+	"golang.org/x/sync/errgroup"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"sync"
+	"path/filepath"
+	"syscall"
 	"time"
 )
 
 type Crun struct {
-	Config                 *Config
-	L                      *lua.LState
-	Report                 *structs.Report
-	CommandArgs            []string
-	StdoutWriter           io.Writer
-	StderrWriter           io.Writer
-	preHandlersAreExecuted bool
+	Config       *Config
+	L            *lua.LState
+	Report       *structs.Report
+	CommandArgs  []string
+	StdoutWriter io.Writer
+	StderrWriter io.Writer
+	lockfile     *os.File
 }
 
 func New() *Crun {
@@ -46,7 +49,7 @@ func (c *Crun) Close() {
 func (c *Crun) Run() (*structs.Report, error) {
 	hostname, _ := os.Hostname()
 	r := &structs.Report{
-		Command:     shellquote.Join(c.CommandArgs...),
+		Command:     c.Command(),
 		CommandArgs: c.CommandArgs,
 		Tag:         c.Config.Tag,
 		ExitCode:    -1,
@@ -54,18 +57,25 @@ func (c *Crun) Run() (*structs.Report, error) {
 	}
 	c.Report = r
 
-	if c.Config.InitByLua != ""{
-		if err := c.L.DoString(c.Config.InitByLua); err != nil {
-			return r, err
-		}
+	if err := c.Config.Prepare(); err != nil {
+		return r, err
 	}
+
+	//if c.Config.InitByLua != "" {
+	//	if err := c.L.DoString(c.Config.InitByLua); err != nil {
+	//		return r, err
+	//	}
+	//}
 
 	if c.CommandArgs == nil || len(c.CommandArgs) == 0 {
 		return r, errors.New("requires a command to execute")
 	}
 
-	if err := c.Config.ParseEnvironment(); err != nil {
-		return r, err
+	// create tmp directory
+	if _, err := os.Stat(c.Config.Tmpdir); os.IsNotExist(err) {
+		defaultUmask := syscall.Umask(0)
+		os.MkdirAll(c.Config.Tmpdir, 0777)
+		syscall.Umask(defaultUmask)
 	}
 
 	if c.Config.Quiet {
@@ -86,7 +96,7 @@ func (c *Crun) Run() (*structs.Report, error) {
 	if c.Config.LogFile != "" {
 		f, err := os.OpenFile(c.Config.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
-			c.handleErrorBeforeRunning(r, err.Error())
+			c.handleErrorBeforeRunning(r, err)
 			return r, err
 		}
 
@@ -98,17 +108,25 @@ func (c *Crun) Run() (*structs.Report, error) {
 		c.StderrWriter = io.MultiWriter(c.StderrWriter, logWriter)
 	}
 
+	if c.Config.WithoutOverlapping {
+		if err := c.lockForWithoutOverlapping(); err != nil {
+			c.handleErrorBeforeRunning(r, err)
+			return r, err
+		}
+		defer c.unlockForWithoutOverlapping()
+	}
+
 	cmd := exec.Command(c.CommandArgs[0], c.CommandArgs[1:]...)
 	cmd.Stdin = os.Stdin
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		c.handleErrorBeforeRunning(r, err.Error())
+		c.handleErrorBeforeRunning(r, err)
 		return r, err
 	}
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
 		stdoutPipe.Close()
-		c.handleErrorBeforeRunning(r, err.Error())
+		c.handleErrorBeforeRunning(r, err)
 		return r, err
 	}
 
@@ -120,13 +138,16 @@ func (c *Crun) Run() (*structs.Report, error) {
 	stderrPipe2 := io.TeeReader(stderrPipe, io.MultiWriter(&bufStderr, &bufMerged))
 
 	// run pre handlers
-	c.runPreHandlers(r)
+	if err := c.runPreHandlers(r); err != nil {
+		c.handleErrorBeforeRunning(r, err)
+		return r, err
+	}
 
 	r.StartAt = now()
 	if err := cmd.Start(); err != nil {
 		stderrPipe.Close()
 		stdoutPipe.Close()
-		c.handleErrorBeforeRunning(r, err.Error())
+		c.handleErrorBeforeRunning(r, err)
 		return r, err
 	}
 	if cmd.Process != nil {
@@ -134,32 +155,27 @@ func (c *Crun) Run() (*structs.Report, error) {
 	}
 
 	// run notice handlers
-	done := make(chan struct{})
+	done := make(chan error)
 	go func() {
-		c.runNoticeHandlers(r)
-		done <- struct{}{}
+		done <- c.runNoticeHandlers(r)
 	}()
 
-	outDone := make(chan struct{})
-	go func() {
-		defer func() {
-			stdoutPipe.Close()
-			outDone <- struct{}{}
-		}()
-		io.Copy(c.StdoutWriter, stdoutPipe2)
-	}()
+	eg := &errgroup.Group{}
+	eg.Go(func() error {
+		defer stdoutPipe.Close()
+		_, err := io.Copy(c.StdoutWriter, stdoutPipe2)
+		return err
+	})
 
-	errDone := make(chan struct{})
-	go func() {
-		defer func() {
-			stderrPipe.Close()
-			errDone <- struct{}{}
-		}()
-		io.Copy(c.StderrWriter, stderrPipe2)
-	}()
+	eg.Go(func() error {
+		defer stderrPipe.Close()
+		_, err := io.Copy(c.StderrWriter, stderrPipe2)
+		return err
+	})
 
-	<-outDone
-	<-errDone
+	if err := eg.Wait(); err != nil {
+		c.handleError(err)
+	}
 
 	err = cmd.Wait()
 	r.EndAt = now()
@@ -179,79 +195,75 @@ func (c *Crun) Run() (*structs.Report, error) {
 	}
 
 	if err != nil {
-		c.runFailureHandlers(r)
+		if err := c.runFailureHandlers(r); err != nil {
+			c.handleError(err)
+		}
 	} else {
-		c.runSuccessHandlers(r)
+		if err := c.runSuccessHandlers(r); err != nil {
+			c.handleError(err)
+		}
 	}
 
 	// run post handlers
-	c.runPostHandlers(r)
+	if err := c.runPostHandlers(r); err != nil {
+		c.handleError(err)
+	}
 
 	<-done
-
 	return r, nil
 }
 
-func (c *Crun) handleErrorBeforeRunning(r *structs.Report, errStr string) {
+func (c *Crun) handleError(err error) {
+	c.StderrWriter.Write([]byte(err.Error() + "\n"))
+}
+
+func (c *Crun) handleErrorBeforeRunning(r *structs.Report, err error) {
 	r.ExitCode = -1
-	r.Result = fmt.Sprintf("failed to execute command: %s", errStr)
-	c.runPreHandlers(r)
+	r.Result = fmt.Sprintf("failed to execute command: %v", err)
 
-	done := make(chan struct{})
-	go func() {
-		c.runNoticeHandlers(r)
-		done <- struct{}{}
-	}()
-
-	c.runFailureHandlers(r)
-	c.runPostHandlers(r)
-
-	<-done
-}
-
-func (c *Crun) runPreHandlers(r *structs.Report) {
-	if c.preHandlersAreExecuted {
-		return
+	if err := c.runFailureHandlers(r); err != nil {
+		c.handleError(err)
 	}
 
-	b, _ := json.Marshal(r)
-	c.runHandlers(c.Config.PreHandlers, b, "pre")
-	c.preHandlersAreExecuted = true
+	if err := c.runPostHandlers(r); err != nil {
+		c.handleError(err)
+	}
 }
 
-func (c *Crun) runNoticeHandlers(r *structs.Report) {
+func (c *Crun) runPreHandlers(r *structs.Report) error {
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.Config.NoticeHandlers, b, "notice")
+	return c.runHandlers(c.Config.PreHandlers, b, "pre")
 }
 
-func (c *Crun) runPostHandlers(r *structs.Report) {
+func (c *Crun) runNoticeHandlers(r *structs.Report) error {
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.Config.PostHandlers, b, "post")
+	return c.runHandlers(c.Config.NoticeHandlers, b, "notice")
 }
 
-func (c *Crun) runSuccessHandlers(r *structs.Report) {
+func (c *Crun) runPostHandlers(r *structs.Report) error {
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.Config.SuccessHandlers, b, "success")
+	return c.runHandlers(c.Config.PostHandlers, b, "post")
 }
 
-func (c *Crun) runFailureHandlers(r *structs.Report) {
+func (c *Crun) runSuccessHandlers(r *structs.Report) error {
 	b, _ := json.Marshal(r)
-	c.runHandlers(c.Config.FailureHandlers, b, "failure")
+	return c.runHandlers(c.Config.SuccessHandlers, b, "success")
 }
 
-func (c *Crun) runHandlers(handlers []string, json []byte, handlerType string) {
-	wg := &sync.WaitGroup{}
+func (c *Crun) runFailureHandlers(r *structs.Report) error {
+	b, _ := json.Marshal(r)
+	return c.runHandlers(c.Config.FailureHandlers, b, "failure")
+}
+
+func (c *Crun) runHandlers(handlers []string, json []byte, handlerType string) error {
+	eg := &errgroup.Group{}
 	for _, handler := range handlers {
-		wg.Add(1)
-		go func(handler string) {
-			err := c.runHandler(handler, json, handlerType)
-			if err != nil {
-				c.StderrWriter.Write([]byte(err.Error() + "\n"))
-			}
-			wg.Done()
-		}(handler)
+		h := handler
+		eg.Go(func() error {
+			return c.runHandler(h, json, handlerType)
+		})
 	}
-	wg.Wait()
+	return eg.Wait()
 }
 
 func (c *Crun) runHandler(cmdStr string, json []byte, handlerType string) error {
@@ -278,6 +290,48 @@ func (c *Crun) runHandler(cmdStr string, json []byte, handlerType string) error 
 	stdinPipe.Close()
 
 	return cmd.Wait()
+}
+
+func (c *Crun) lockForWithoutOverlapping() error {
+	mutexFile := c.overlappingMutexFile()
+
+	// create lock file and try to get the lock
+	file, err := os.OpenFile(mutexFile, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	c.lockfile = file
+
+	if err := flock(c.lockfile, 0644, true, 1*time.Millisecond); err != nil {
+		if err == ErrTimeout {
+			return fmt.Errorf("the command '%s' has already been running", c.Command())
+		}
+	}
+
+	return nil
+}
+
+func (c *Crun) unlockForWithoutOverlapping() {
+	if c.lockfile != nil {
+		funlock(c.lockfile)
+	}
+
+	mutexFile := c.overlappingMutexFile()
+	if _, err := os.Stat(mutexFile); err == nil {
+		os.RemoveAll(mutexFile)
+	}
+}
+
+func (c *Crun) overlappingMutexFile() string {
+	return filepath.Join(c.Config.Tmpdir, c.overlappingMutexName())
+}
+
+func (c *Crun) overlappingMutexName() string {
+	return fmt.Sprintf("job-%x", sha1.Sum([]byte(c.Command())))
+}
+
+func (c *Crun) Command() string {
+	return shellquote.Join(c.CommandArgs...)
 }
 
 func now() *time.Time {

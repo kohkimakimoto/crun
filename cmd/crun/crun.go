@@ -31,8 +31,8 @@ func realMain() (status int) {
 	}()
 
 	// parse flags...
-	var optVersion, optQuiet, optLua bool
-	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile string
+	var optVersion, optQuiet, optLua, optWithoutOverlapping bool
+	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optTmpdir string
 	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
 
 	flag.StringVar(&optTag, "t", "", "")
@@ -41,20 +41,23 @@ func realMain() (status int) {
 	flag.StringVar(&optWd, "working-directory", "", "")
 	flag.StringVar(&optConfigFile, "c", "", "")
 	flag.StringVar(&optConfigFile, "config-file", "", "")
+	flag.StringVar(&optLogFile, "log-file", "", "")
+	flag.StringVar(&optLogPrefix, "log-prefix", "", "")
+	flag.StringVar(&optTmpdir, "tmpdir", "", "")
 	flag.Var(&optEnv, "e", "")
 	flag.Var(&optEnv, "env", "")
 	flag.BoolVar(&optVersion, "v", false, "")
 	flag.BoolVar(&optVersion, "version", false, "")
 	flag.BoolVar(&optQuiet, "q", false, "")
 	flag.BoolVar(&optQuiet, "quiet", false, "")
-	flag.BoolVar(&optLua, "lua", false, "")
+	flag.BoolVar(&optWithoutOverlapping, "without-overlapping", false, "")
 	flag.Var(&optPre, "pre", "")
 	flag.Var(&optNotice, "notice", "")
 	flag.Var(&optSuccess, "success", "")
 	flag.Var(&optFailure, "failure", "")
 	flag.Var(&optPost, "post", "")
-	flag.StringVar(&optLogFile, "log-file", "", "")
-	flag.StringVar(&optLogPrefix, "log-prefix", "", "")
+	// hidden flag
+	flag.BoolVar(&optLua, "lua", false, "")
 
 	flag.Usage = func() {
 		fmt.Println(`Usage: ` + crun.Name + ` [OPTIONS...] <COMMAND...>
@@ -66,20 +69,25 @@ Copyright (c) Kohki Makimoto <kohki.makimoto@gmail.com>
 The MIT License (MIT)
 
 Options:
-  -h, --help                 Show help.
-  -v, --version              Print the version.
   -t, --tag                  Arbitrary tag of the job.
   -w, --working-directory    If specified, use the given directory as working directory. 
   -e, --env                  Set custom environment variables. ex) -e KEY=VALUE
+
   --pre                      Set pre handler.
   --notice                   Set notice handler.
   --success                  Set success handler.
   --failure                  Set failure handler.
   --post                     Set post handler.
+
   --log-file                 The file path to write merged output.
   --log-prefix               The prefix for the merged output log. This option is used with '--log-file' option.
   -q, --quiet                Suppress outputting to stdout.
 
+  --without-overlapping      Prevent overlapping execution tha job.
+  --tmpdir                   The temporary directory path.
+
+  -h, --help                 Show help.
+  -v, --version              Print the version.
 `)
 	}
 	flag.Parse()
@@ -102,10 +110,8 @@ Options:
 			return 0
 		}
 
-		L := crun.NewLuaProcess()
-		L.ScriptFile = flag.Args()[0]
-
-		if err := L.Run(flag.Args()); err != nil {
+		lapp := crun.NewLuaApp()
+		if err := lapp.Run(flag.Args()); err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err)
 			return 1
 		}
@@ -151,6 +157,12 @@ Options:
 	}
 	if optQuiet {
 		c.Config.Quiet = optQuiet
+	}
+	if optWithoutOverlapping {
+		c.Config.WithoutOverlapping = optWithoutOverlapping
+	}
+	if optTmpdir != "" {
+		c.Config.Tmpdir = optTmpdir
 	}
 	if len(optEnv) > 0 {
 		c.Config.Environment = append(c.Config.Environment, optEnv...)
