@@ -96,7 +96,7 @@ func (c *Crun) Run() (*structs.Report, error) {
 	if c.Config.LogFile != "" {
 		f, err := os.OpenFile(c.Config.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
-			c.handleErrorBeforeRunning(r, err)
+			c.handleErrorBeforeRunning(r, err, nil)
 			return r, err
 		}
 
@@ -110,7 +110,7 @@ func (c *Crun) Run() (*structs.Report, error) {
 
 	if c.Config.WithoutOverlapping {
 		if err := c.lockForWithoutOverlapping(); err != nil {
-			c.handleErrorBeforeRunning(r, err)
+			c.handleErrorBeforeRunning(r, err, []string{"CRUN_OVERLAPPING=1"})
 			return r, err
 		}
 		defer c.unlockForWithoutOverlapping()
@@ -120,13 +120,13 @@ func (c *Crun) Run() (*structs.Report, error) {
 	cmd.Stdin = os.Stdin
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		c.handleErrorBeforeRunning(r, err)
+		c.handleErrorBeforeRunning(r, err, nil)
 		return r, err
 	}
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
 		stdoutPipe.Close()
-		c.handleErrorBeforeRunning(r, err)
+		c.handleErrorBeforeRunning(r, err, nil)
 		return r, err
 	}
 
@@ -138,8 +138,8 @@ func (c *Crun) Run() (*structs.Report, error) {
 	stderrPipe2 := io.TeeReader(stderrPipe, io.MultiWriter(&bufStderr, &bufMerged))
 
 	// run pre handlers
-	if err := c.runPreHandlers(r); err != nil {
-		c.handleErrorBeforeRunning(r, err)
+	if err := c.runPreHandlers(r, nil); err != nil {
+		c.handleErrorBeforeRunning(r, err, nil)
 		return r, err
 	}
 
@@ -147,7 +147,7 @@ func (c *Crun) Run() (*structs.Report, error) {
 	if err := cmd.Start(); err != nil {
 		stderrPipe.Close()
 		stdoutPipe.Close()
-		c.handleErrorBeforeRunning(r, err)
+		c.handleErrorBeforeRunning(r, err, nil)
 		return r, err
 	}
 	if cmd.Process != nil {
@@ -157,7 +157,7 @@ func (c *Crun) Run() (*structs.Report, error) {
 	// run notice handlers
 	done := make(chan error)
 	go func() {
-		done <- c.runNoticeHandlers(r)
+		done <- c.runNoticeHandlers(r, nil)
 	}()
 
 	eg := &errgroup.Group{}
@@ -195,17 +195,17 @@ func (c *Crun) Run() (*structs.Report, error) {
 	}
 
 	if err != nil {
-		if err := c.runFailureHandlers(r); err != nil {
+		if err := c.runFailureHandlers(r, nil); err != nil {
 			c.handleError(err)
 		}
 	} else {
-		if err := c.runSuccessHandlers(r); err != nil {
+		if err := c.runSuccessHandlers(r, nil); err != nil {
 			c.handleError(err)
 		}
 	}
 
 	// run post handlers
-	if err := c.runPostHandlers(r); err != nil {
+	if err := c.runPostHandlers(r, nil); err != nil {
 		c.handleError(err)
 	}
 
@@ -217,56 +217,56 @@ func (c *Crun) handleError(err error) {
 	c.StderrWriter.Write([]byte(err.Error() + "\n"))
 }
 
-func (c *Crun) handleErrorBeforeRunning(r *structs.Report, err error) {
+func (c *Crun) handleErrorBeforeRunning(r *structs.Report, err error, customEnv []string) {
 	r.ExitCode = -1
 	r.Result = fmt.Sprintf("failed to execute command: %v", err)
 
-	if err := c.runFailureHandlers(r); err != nil {
+	if err := c.runFailureHandlers(r, customEnv); err != nil {
 		c.handleError(err)
 	}
 
-	if err := c.runPostHandlers(r); err != nil {
+	if err := c.runPostHandlers(r, customEnv); err != nil {
 		c.handleError(err)
 	}
 }
 
-func (c *Crun) runPreHandlers(r *structs.Report) error {
+func (c *Crun) runPreHandlers(r *structs.Report, customEnv []string) error {
 	b, _ := json.Marshal(r)
-	return c.runHandlers(c.Config.PreHandlers, b, "pre")
+	return c.runHandlers(c.Config.PreHandlers, b, "pre", customEnv)
 }
 
-func (c *Crun) runNoticeHandlers(r *structs.Report) error {
+func (c *Crun) runNoticeHandlers(r *structs.Report, customEnv []string) error {
 	b, _ := json.Marshal(r)
-	return c.runHandlers(c.Config.NoticeHandlers, b, "notice")
+	return c.runHandlers(c.Config.NoticeHandlers, b, "notice", customEnv)
 }
 
-func (c *Crun) runPostHandlers(r *structs.Report) error {
+func (c *Crun) runPostHandlers(r *structs.Report, customEnv []string) error {
 	b, _ := json.Marshal(r)
-	return c.runHandlers(c.Config.PostHandlers, b, "post")
+	return c.runHandlers(c.Config.PostHandlers, b, "post", customEnv)
 }
 
-func (c *Crun) runSuccessHandlers(r *structs.Report) error {
+func (c *Crun) runSuccessHandlers(r *structs.Report, customEnv []string) error {
 	b, _ := json.Marshal(r)
-	return c.runHandlers(c.Config.SuccessHandlers, b, "success")
+	return c.runHandlers(c.Config.SuccessHandlers, b, "success", customEnv)
 }
 
-func (c *Crun) runFailureHandlers(r *structs.Report) error {
+func (c *Crun) runFailureHandlers(r *structs.Report, customEnv []string) error {
 	b, _ := json.Marshal(r)
-	return c.runHandlers(c.Config.FailureHandlers, b, "failure")
+	return c.runHandlers(c.Config.FailureHandlers, b, "failure", customEnv)
 }
 
-func (c *Crun) runHandlers(handlers []string, json []byte, handlerType string) error {
+func (c *Crun) runHandlers(handlers []string, json []byte, handlerType string, customEnv []string) error {
 	eg := &errgroup.Group{}
 	for _, handler := range handlers {
 		h := handler
 		eg.Go(func() error {
-			return c.runHandler(h, json, handlerType)
+			return c.runHandler(h, json, handlerType, customEnv)
 		})
 	}
 	return eg.Wait()
 }
 
-func (c *Crun) runHandler(cmdStr string, json []byte, handlerType string) error {
+func (c *Crun) runHandler(cmdStr string, json []byte, handlerType string, customEnv []string) error {
 	args, err := shellquote.Split(cmdStr)
 	if err != nil || len(args) < 1 {
 		return fmt.Errorf("invalid handler: %q", cmdStr)
@@ -275,6 +275,12 @@ func (c *Crun) runHandler(cmdStr string, json []byte, handlerType string) error 
 	// set handler type to environment
 	env := os.Environ()
 	env = append(env, "CRUN_HANDLER_TYPE="+handlerType)
+
+	if customEnv != nil {
+		for _, ce := range customEnv {
+			env = append(env, ce)
+		}
+	}
 
 	cmd := exec.Command(args[0], args[1:]...)
 	stdinPipe, _ := cmd.StdinPipe()
@@ -304,7 +310,7 @@ func (c *Crun) lockForWithoutOverlapping() error {
 
 	if err := flock(c.lockfile, 0644, true, 1*time.Millisecond); err != nil {
 		if err == ErrTimeout {
-			return fmt.Errorf("the command '%s' has already been running", c.Command())
+			return fmt.Errorf("failed to run the command, because '%s' has already been running", c.Command())
 		}
 	}
 
