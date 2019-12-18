@@ -32,7 +32,7 @@ func realMain() (status int) {
 
 	// parse flags...
 	var optVersion, optQuiet, optLua, optWithoutOverlapping bool
-	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optTmpdir string
+	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optTmpdir, optInitByLua string
 	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
 
 	flag.StringVar(&optTag, "t", "", "")
@@ -44,6 +44,7 @@ func realMain() (status int) {
 	flag.StringVar(&optLogFile, "log-file", "", "")
 	flag.StringVar(&optLogPrefix, "log-prefix", "", "")
 	flag.StringVar(&optTmpdir, "tmpdir", "", "")
+	flag.StringVar(&optInitByLua, "init-by-lua", "", "")
 	flag.Var(&optEnv, "e", "")
 	flag.Var(&optEnv, "env", "")
 	flag.BoolVar(&optVersion, "v", false, "")
@@ -85,6 +86,8 @@ Options:
 
   --without-overlapping      Prevent overlapping execution tha job.
   --tmpdir                   The temporary directory path.
+
+  --init-by-lua              Lua code executed in initializing.
 
   -h, --help                 Show help.
   -v, --version              Print the version.
@@ -166,6 +169,9 @@ Options:
 	}
 	if len(optEnv) > 0 {
 		c.Config.Environment = append(c.Config.Environment, optEnv...)
+	}
+	if optInitByLua != "" {
+		c.Config.InitByLua = optInitByLua
 	}
 
 	r, err := c.Run()

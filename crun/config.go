@@ -24,6 +24,7 @@ type Config struct {
 	Environment        []string          `toml:"environments"`
 	EnvironmentMap     map[string]string `toml:"-"`
 	WithoutOverlapping bool              `toml:"without_overlapping"`
+	InitByLua          string            `toml:"init_by_lua"`
 }
 
 func newConfig() *Config {
@@ -37,6 +38,7 @@ func newConfig() *Config {
 		Tmpdir:             DefaultTmpdir,
 		EnvironmentMap:     map[string]string{},
 		WithoutOverlapping: false,
+		InitByLua: "",
 	}
 }
 func (c *Config) LoadConfigFile(path string) error {

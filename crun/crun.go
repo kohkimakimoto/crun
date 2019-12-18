@@ -57,18 +57,18 @@ func (c *Crun) Run() (*structs.Report, error) {
 	}
 	c.Report = r
 
-	if err := c.Config.Prepare(); err != nil {
-		return r, err
-	}
-
-	//if c.Config.InitByLua != "" {
-	//	if err := c.L.DoString(c.Config.InitByLua); err != nil {
-	//		return r, err
-	//	}
-	//}
-
 	if c.CommandArgs == nil || len(c.CommandArgs) == 0 {
 		return r, errors.New("requires a command to execute")
+	}
+
+	if c.Config.InitByLua != "" {
+		if err := c.L.DoString(c.Config.InitByLua); err != nil {
+			return r, err
+		}
+	}
+
+	if err := c.Config.Prepare(); err != nil {
+		return r, err
 	}
 
 	// create tmp directory
