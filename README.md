@@ -1,14 +1,7 @@
 # Crun <!-- omit in toc -->
 
-Crun (Command-RUN) is a command execution wrapper.
-
-Crun is a simple command that is used with another command. See the following example.
-
-```
-crun -- ls 
-```
-
-Crun appends several useful features.
+Crun (Command-RUN) is a command execution wrapper. It is a simple command that is used with another command. 
+Crun provides several useful features for your command execution.
 
 * **Hooks:**  
 * **Logging:**
