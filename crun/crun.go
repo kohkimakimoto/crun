@@ -9,7 +9,6 @@ import (
 	"github.com/Songmu/wrapcommander"
 	"github.com/kballard/go-shellquote"
 	"github.com/kohkimakimoto/crun/structs"
-	lua "github.com/yuin/gopher-lua"
 	"golang.org/x/sync/errgroup"
 	"io"
 	"io/ioutil"
@@ -22,7 +21,6 @@ import (
 
 type Crun struct {
 	Config       *Config
-	L            *lua.LState
 	Report       *structs.Report
 	CommandArgs  []string
 	StdoutWriter io.Writer
@@ -31,19 +29,15 @@ type Crun struct {
 }
 
 func New() *Crun {
-	L := lua.NewState()
-	openLibs(L)
-
 	return &Crun{
 		Config:       newConfig(),
-		L:            L,
 		StdoutWriter: os.Stdout,
 		StderrWriter: os.Stderr,
 	}
 }
 
 func (c *Crun) Close() {
-	c.L.Close()
+	// nothing to do now...
 }
 
 func (c *Crun) Run() (*structs.Report, error) {
@@ -59,12 +53,6 @@ func (c *Crun) Run() (*structs.Report, error) {
 
 	if c.CommandArgs == nil || len(c.CommandArgs) == 0 {
 		return r, errors.New("requires a command to execute")
-	}
-
-	if c.Config.InitByLua != "" {
-		if err := c.L.DoString(c.Config.InitByLua); err != nil {
-			return r, err
-		}
 	}
 
 	if err := c.Config.Prepare(); err != nil {
@@ -321,11 +309,6 @@ func (c *Crun) unlockForWithoutOverlapping() {
 	if c.lockfile != nil {
 		funlock(c.lockfile)
 	}
-
-	mutexFile := c.overlappingMutexFile()
-	if _, err := os.Stat(mutexFile); err == nil {
-		os.RemoveAll(mutexFile)
-	}
 }
 
 func (c *Crun) overlappingMutexFile() string {
@@ -333,7 +316,7 @@ func (c *Crun) overlappingMutexFile() string {
 }
 
 func (c *Crun) overlappingMutexName() string {
-	return fmt.Sprintf("job-%x", sha1.Sum([]byte(c.Command())))
+	return fmt.Sprintf("job-lock-%x", sha1.Sum([]byte(c.Command())))
 }
 
 func (c *Crun) Command() string {

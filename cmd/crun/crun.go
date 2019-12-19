@@ -85,7 +85,7 @@ Options:
   -q, --quiet                Suppress outputting to stdout.
 
   --without-overlapping      Prevent overlapping execution tha job.
-  --tmpdir                   The temporary directory path.
+  --tmpdir                   The temporary directory path to store job lock files.
 
   --init-by-lua              Lua code executed in initializing.
 

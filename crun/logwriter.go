@@ -3,6 +3,7 @@ package crun
 import (
 	"bytes"
 	"io"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -54,10 +55,9 @@ func (w *logWriter) prefixBytes() []byte {
 
 	t := time.Now()
 	tsstr := t.Format(ts)
-	str = strings.Replace(str, "%ts", tsstr, -1)
-	str = strings.Replace(str, "%timestamp", tsstr, -1)
+	str = strings.Replace(str, "%time", tsstr, -1)
 	str = strings.Replace(str, "%tag", c.Config.Tag, -1)
-	str = strings.Replace(str, "%t", c.Config.Tag, -1)
+	str = strings.Replace(str, "%pid", strconv.Itoa(c.Report.Pid), -1)
 
 	return []byte(str)
 }
