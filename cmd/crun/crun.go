@@ -15,7 +15,7 @@ func main() {
 type stringSlice []string
 
 func (ss *stringSlice) String() string {
-	return fmt.Sprint("%v", *ss)
+	return fmt.Sprintf("%v", *ss)
 }
 func (ss *stringSlice) Set(value string) error {
 	*ss = append(*ss, value)
@@ -62,7 +62,7 @@ func realMain() (status int) {
 	flag.Usage = func() {
 		fmt.Println(`Usage: ` + crun.Name + ` [OPTIONS...] <COMMAND...>
 
-` + crun.Name + ` -- Command execution tool
+` + crun.Name + ` -- Command execution wrapper.
 version ` + crun.Version + ` (` + crun.CommitHash + `)
 
 Copyright (c) Kohki Makimoto <kohki.makimoto@gmail.com>

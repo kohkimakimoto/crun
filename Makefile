@@ -30,7 +30,7 @@ dev: ## Build dev binary
 	@bash -c $(CURDIR)/build/scripts/dev.sh
 
 .PHONY:dist
-dist: bindata ## Build dist binaries
+dist: ## Build dist binaries
 	@bash -c $(CURDIR)/build/scripts/dist.sh
 
 .PHONY:clean
