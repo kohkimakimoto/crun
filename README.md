@@ -1,8 +1,21 @@
 # Crun <!-- omit in toc -->
 
-Crun (Command-RUN) is a command execution tool.
+Crun (Command-RUN) is a command execution wrapper.
 
-The main feature of crun is to append hook handlers to command execution. It is useful for cron jobs to report their results. Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), and It has been heavily modified.
+Crun is a simple command that is used with another command. See the following example.
+
+```
+crun -- ls 
+```
+
+Crun appends several useful features.
+
+* **Hooks:**  
+* **Logging:**
+* **Preventing Overlaps:** 
+* **Environment Variables:**
+
+Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), and It has been heavily modified.
 
 ## Table of Contents <!-- omit in toc -->
 
