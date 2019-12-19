@@ -39,7 +39,7 @@ type Report struct {
 	Output      string     `json:"output"`
 	Stdout      string     `json:"stdout"`
 	Stderr      string     `json:"stderr"`
-	ExitCode    int        `json:"exitCode,omitempty"`
+	ExitCode    int        `json:"exitCode"`
 	Signaled    bool       `json:"signaled"`
 	Result      string     `json:"result"`
 	Hostname    string     `json:"hostname"`
