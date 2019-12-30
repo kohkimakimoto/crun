@@ -12,6 +12,16 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
 
 ## Table of Contents <!-- omit in toc -->
 
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Example](#example)
+  - [Handlers](#handlers)
+  - [Execution Sequence](#execution-sequence)
+  - [Logging](#logging)
+  - [Preventing Overlaps](#preventing-overlaps)
+- [Author](#author)
+- [License](#license)
+
 ## Installation
 
 Crun is provided as a single binary. You can download it on Github releases page.
@@ -52,6 +62,14 @@ Crun supports several hook points: `pre`, `notice`, `success`, `failure` and `po
 4. Wait to finish the command
 5. Run `success` or `failure` handlers
 6. Run `post` handlers
+
+### Logging
+
+TODO: write docs
+
+### Preventing Overlaps
+
+TODO: write docs
 
 ## Author
 
