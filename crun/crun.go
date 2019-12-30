@@ -246,7 +246,7 @@ func (c *Crun) handleError(err error) {
 
 func (c *Crun) handleErrorBeforeRunning(r *structs.Report, err error, customEnv []string) (*structs.Report, error) {
 	r.ExitCode = -1
-	r.Result = fmt.Sprintf("failed to execute command: %v", err)
+	r.Result = err.Error()
 	if err := c.runFailureHandlers(r, customEnv); err != nil {
 		c.handleError(err)
 	}
