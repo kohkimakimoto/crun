@@ -351,7 +351,11 @@ func (c *Crun) overlappingMutexFile() string {
 }
 
 func (c *Crun) overlappingMutexName() string {
-	return fmt.Sprintf("job-mutex-%x", sha1.Sum([]byte(c.Command())))
+	mutex := c.Config.Mutex
+	if mutex == "" {
+		mutex = fmt.Sprintf("%x", sha1.Sum([]byte(c.Command())))
+	}
+	return fmt.Sprintf("crun-mutex-%s", mutex)
 }
 
 func (c *Crun) Command() string {

@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-var DefaultConfigFile = "/etc/crun/crun.toml"
 var DefaultMutexdir = "/tmp/crun"
 
 type Config struct {
@@ -21,6 +20,7 @@ type Config struct {
 	Quiet              bool              `toml:"quiet"`
 	WorkingDirectory   string            `toml:"working_directory"`
 	Mutexdir           string            `toml:"mutexdir"`
+	Mutex              string            `toml:"mutex"`
 	Environment        []string          `toml:"environments"`
 	EnvironmentMap     map[string]string `toml:"-"`
 	WithoutOverlapping bool              `toml:"without_overlapping"`

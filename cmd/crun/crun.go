@@ -32,7 +32,7 @@ func realMain() (status int) {
 
 	// parse flags...
 	var optVersion, optQuiet, optLua, optWithoutOverlapping bool
-	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optMutexdir, optUser, optGroup string
+	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optMutexdir, optMutex, optUser, optGroup string
 	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
 
 	flag.StringVar(&optTag, "t", "", "")
@@ -44,6 +44,7 @@ func realMain() (status int) {
 	flag.StringVar(&optLogFile, "log-file", "", "")
 	flag.StringVar(&optLogPrefix, "log-prefix", "", "")
 	flag.StringVar(&optMutexdir, "mutexdir", "", "")
+	flag.StringVar(&optMutex, "mutex", "", "")
 	flag.StringVar(&optUser, "user", "", "")
 	flag.StringVar(&optGroup, "group", "", "")
 	flag.Var(&optEnv, "e", "")
@@ -72,7 +73,7 @@ The MIT License (MIT)
 
 Options:
   (General)
-  -c. --config-file <path>         Load config from the file. (default: /etc/crun/crun.toml)
+  -c. --config-file <path>         Load config from the file.
   -t, --tag <string>               Set a tag of the job.
   -w, --working-directory <dir>    If specified, use the given directory as working directory. 
   -e, --env <KEY=VALUE>            Set custom environment variables. ex) -e KEY=VALUE
@@ -94,6 +95,7 @@ Options:
   (Overlapping)
   --without-overlapping            Prevent overlapping execution the job.
   --mutexdir <dir>                 The directory path to store job mutex files. (default: /tmp/crun)
+  --mutex <string>                 Overriding the mutex id.
 
   (Help)
   -h, --help                       Show help.
@@ -174,6 +176,9 @@ Options:
 	if optMutexdir != "" {
 		c.Config.Mutexdir = optMutexdir
 	}
+	if optMutex != "" {
+		c.Config.Mutex = optMutex
+	}
 	if optUser != "" {
 		c.Config.User = optUser
 	}
@@ -198,13 +203,7 @@ func loadConfigFile(c *crun.Crun, optConfigFile string) error {
 		if err := c.Config.LoadConfigFile(optConfigFile); err != nil {
 			return fmt.Errorf("failed to open file: %s %v", optConfigFile, err)
 		}
-	} else {
-		// default config
-		if _, err := os.Stat(crun.DefaultConfigFile); err == nil {
-			if err := c.Config.LoadConfigFile(crun.DefaultConfigFile); err != nil {
-				return err
-			}
-		}
 	}
+
 	return nil
 }
