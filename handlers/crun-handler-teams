@@ -76,6 +76,7 @@ Options:
                                     Stdout
                                     Stderr
                                     ExitCode
+                                    Signaled
                                     Result
                                     Pid
                                     StartAt
@@ -151,6 +152,13 @@ if report.exitCode and (hasValue(items, 'all') or hasValue(items, 'ExitCode'))th
     table.insert(facts, {
         name = "ExitCode",
         value = report.exitCode,
+    })
+end
+
+if report.signaled and (hasValue(items, 'all') or hasValue(items, 'Signaled'))then
+    table.insert(facts, {
+        name = "Signaled",
+        value = report.signaled,
     })
 end
 
