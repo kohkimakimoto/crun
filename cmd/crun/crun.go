@@ -69,25 +69,31 @@ Copyright (c) Kohki Makimoto <kohki.makimoto@gmail.com>
 The MIT License (MIT)
 
 Options:
-  -t, --tag                  Arbitrary tag of the job.
-  -w, --working-directory    If specified, use the given directory as working directory. 
-  -e, --env                  Set custom environment variables. ex) -e KEY=VALUE
+  (General)
+  -c. --config-file <path>         Load config from the file. (default: /etc/crun/crun.toml)
+  -t, --tag <string>               Arbitrary tag of the job.
+  -w, --working-directory <dir>    If specified, use the given directory as working directory. 
+  -e, --env <KEY=VALUE>            Set custom environment variables. ex) -e KEY=VALUE
+  
+  (Handlers)
+  --pre <handler>                  Set pre handler. This option can be set multi time.
+  --notice <handler>               Set notice handler. This option can be set multi time.
+  --success <handler>              Set success handler. This option can be set multi time.
+  --failure <handler>              Set failure handler. This option can be set multi time.
+  --post <handler>                 Set post handler. This option can be set multi time.
 
-  --pre                      Set pre handler.
-  --notice                   Set notice handler.
-  --success                  Set success handler.
-  --failure                  Set failure handler.
-  --post                     Set post handler.
+  (Logging)
+  --log-file <path>                The file path to write merged output.
+  --log-prefix <string>            The prefix for the merged output log. This option is used with '--log-file' option.
+  -q, --quiet                      Suppress outputting to stdout.
 
-  --log-file                 The file path to write merged output.
-  --log-prefix               The prefix for the merged output log. This option is used with '--log-file' option.
-  -q, --quiet                Suppress outputting to stdout.
+  (Overlapping)
+  --without-overlapping            Prevent overlapping execution tha job.
+  --tmpdir <dir>                   The temporary directory path to store job mutex files. (default: /tmp/crun)
 
-  --without-overlapping      Prevent overlapping execution tha job.
-  --tmpdir                   The temporary directory path to store job lock files.
-
-  -h, --help                 Show help.
-  -v, --version              Print the version.
+  (Help)
+  -h, --help                       Show help.
+  -v, --version                    Print the version.
 `)
 	}
 	flag.Parse()
