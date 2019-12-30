@@ -99,15 +99,15 @@ func (c *Crun) Run() (*structs.Report, error) {
 		defer c.unlockForWithoutOverlapping()
 	}
 
-	uid, gid, err := c.getUidAndGid()
-	if err != nil {
-		return c.handleErrorBeforeRunning(r, err, nil)
-	}
-
 	cmd := exec.Command(c.CommandArgs[0], c.CommandArgs[1:]...)
 	cmd.Stdin = os.Stdin
 
 	if os.Getuid() == 0 {
+		uid, gid, err := c.getUidAndGid()
+		if err != nil {
+			return c.handleErrorBeforeRunning(r, err, nil)
+		}
+
 		cmd.SysProcAttr = &syscall.SysProcAttr{}
 		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
 	}
