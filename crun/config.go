@@ -21,7 +21,7 @@ type Config struct {
 	WorkingDirectory   string            `toml:"working_directory"`
 	Mutexdir           string            `toml:"mutexdir"`
 	Mutex              string            `toml:"mutex"`
-	Environment        []string          `toml:"environments"`
+	Environment        []string          `toml:"environment"`
 	EnvironmentMap     map[string]string `toml:"-"`
 	WithoutOverlapping bool              `toml:"without_overlapping"`
 	User               string            `toml:"user"`

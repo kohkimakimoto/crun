@@ -122,6 +122,9 @@ Example:
 post = [
   "/path/to/posthandler",
 ]
+environment = [
+  "KEY=VALUE"
+]
 log_file = "/path/to/logfile.log"
 ```
 
