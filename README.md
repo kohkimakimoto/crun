@@ -20,6 +20,7 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
   - [Execution Sequence](#execution-sequence)
   - [Logging](#logging)
   - [Preventing Overlaps](#preventing-overlaps)
+- [Config](#config)
 - [Lua Interpreter](#lua-interpreter)
   - [Example](#example-1)
 - [Author](#author)
@@ -105,11 +106,19 @@ $ crun --log-file /var/log/file.log -- /path/to/yourcommand
 
 ### Preventing Overlaps
 
-TODO: write docs
+If you use `--without-overlapping`, Crun prevent to overlap the command execution.
+
+```
+$ crun --without-overlapping -- /path/to/yourcommand [...]
+```
+
+## Config
+
+TODO
 
 ## Lua Interpreter
 
-You can implement crun handlers in any programming languages you like. But crun has built-in Lua interpreter to implement handlers without dependences.
+You can implement Crun handlers in any programming languages you like. But crun has built-in Lua interpreter to implement handlers without dependences.
 
 ### Example
 
@@ -123,7 +132,7 @@ local report = json.decode(io.read("*a"))
 print(report.command)
 ```
 
-The first four lines are trick to use [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) to run the script using crun built-in lua intepreter.
+The first four lines are trick to use [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) to run the script using Crun built-in lua intepreter.
 
 See [crun-handler-slack](https://github.com/kohkimakimoto/crun/tree/master/handlers/crun-handler-slack). It's a good example.
 
