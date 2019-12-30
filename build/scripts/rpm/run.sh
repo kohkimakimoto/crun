@@ -14,6 +14,8 @@ platform=el${RHEL_VERSION}
 cp -pr build/scripts/rpm/SPECS $HOME/rpmbuild/
 cp -pr build/scripts/rpm/SOURCES $HOME/rpmbuild/
 cp -pr build/outputs/dist/${PRODUCT_NAME}_linux_amd64.zip $HOME/rpmbuild/SOURCES/${PRODUCT_NAME}_linux_amd64.zip
+cp -pr handlers/crun-handler-slack $HOME/rpmbuild/SOURCES/
+cp -pr handlers/crun-handler-teams $HOME/rpmbuild/SOURCES/
 
 echo "Building RPM..."
 cd $HOME
