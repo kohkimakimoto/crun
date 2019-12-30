@@ -7,7 +7,7 @@ import (
 )
 
 var DefaultConfigFile = "/etc/crun/crun.toml"
-var DefaultTmpdir = "/tmp/crun"
+var DefaultMutexdir = "/tmp/crun"
 
 type Config struct {
 	PreHandlers        []string          `toml:"pre"`
@@ -20,7 +20,7 @@ type Config struct {
 	Tag                string            `toml:"tag"`
 	Quiet              bool              `toml:"quiet"`
 	WorkingDirectory   string            `toml:"working_directory"`
-	Tmpdir             string            `toml:"tmpdir"`
+	Mutexdir           string            `toml:"mutexdir"`
 	Environment        []string          `toml:"environments"`
 	EnvironmentMap     map[string]string `toml:"-"`
 	WithoutOverlapping bool              `toml:"without_overlapping"`
@@ -36,7 +36,7 @@ func newConfig() *Config {
 		SuccessHandlers:    []string{},
 		FailureHandlers:    []string{},
 		Environment:        []string{},
-		Tmpdir:             DefaultTmpdir,
+		Mutexdir:           DefaultMutexdir,
 		EnvironmentMap:     map[string]string{},
 		WithoutOverlapping: false,
 	}

@@ -60,10 +60,10 @@ func (c *Crun) Run() (*structs.Report, error) {
 		return r, err
 	}
 
-	// create tmp directory
-	if _, err := os.Stat(c.Config.Tmpdir); os.IsNotExist(err) {
+	// create mutex directory
+	if _, err := os.Stat(c.Config.Mutexdir); os.IsNotExist(err) {
 		defaultUmask := syscall.Umask(0)
-		if err := os.MkdirAll(c.Config.Tmpdir, 0777); err != nil {
+		if err := os.MkdirAll(c.Config.Mutexdir, 0777); err != nil {
 			return c.handleErrorBeforeRunning(r, err, nil)
 		}
 		syscall.Umask(defaultUmask)
@@ -347,7 +347,7 @@ func (c *Crun) unlockForWithoutOverlapping() {
 }
 
 func (c *Crun) overlappingMutexFile() string {
-	return filepath.Join(c.Config.Tmpdir, c.overlappingMutexName())
+	return filepath.Join(c.Config.Mutexdir, c.overlappingMutexName())
 }
 
 func (c *Crun) overlappingMutexName() string {
