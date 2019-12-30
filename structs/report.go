@@ -8,8 +8,7 @@ import "time"
 //
 // -----------------------------------------------------------------------
 // https://github.com/Songmu/horenso
-//
-// Copyright (c) 2015 Songmu
+// Copyright (c) 2017 Songmu
 //
 // MIT License
 //
@@ -40,12 +39,13 @@ type Report struct {
 	Output      string     `json:"output"`
 	Stdout      string     `json:"stdout"`
 	Stderr      string     `json:"stderr"`
-	ExitCode    *int       `json:"exitCode,omitempty"`
+	ExitCode    int        `json:"exitCode"`
+	Signaled    bool       `json:"signaled"`
 	Result      string     `json:"result"`
 	Hostname    string     `json:"hostname"`
-	Pid         *int       `json:"pid,omitempty"`
+	Pid         int        `json:"pid,omitempty"`
 	StartAt     *time.Time `json:"startAt,omitempty"`
 	EndAt       *time.Time `json:"endAt,omitempty"`
-	SystemTime  *float64   `json:"systemTime,omitempty"`
-	UserTime    *float64   `json:"userTime,omitempty"`
+	SystemTime  float64    `json:"systemTime,omitempty"`
+	UserTime    float64    `json:"userTime,omitempty"`
 }

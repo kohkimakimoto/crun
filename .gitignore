@@ -4,11 +4,17 @@ Thumbs.db
 ._*
 *.iml
 .vscode/
-.buildsh/
-/vendor
-.vagrant
-/_work
+node_modules/
 
-build/outputs/*
+.go-packages/
+/_tmp
+/_work
+/.vagrant
+/.envrc
+/coverage-report.html
+
+/build/outputs/*
+
+/vendor
 
 !.gitkeep

@@ -1,7 +1,8 @@
 package crun
 
 var (
-	Name       = "crun"
-	Version    = "unknown"
-	CommitHash = "unknown"
+	Name        = "crun"
+	DisplayName = "crun"
+	Version     = "unknown"
+	CommitHash  = "unknown"
 )

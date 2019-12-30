@@ -5,7 +5,7 @@ exec crun --lua "$0" "$@"
 -- The following code is written in Lua.
 
 local json = require "json"
-local http = require "http"
+local httpclient = require "httpclient"
 
 -- Functions
 local function parseCSVLine(line) 
@@ -77,6 +77,7 @@ Options:
                             Stdout
                             Stderr
                             ExitCode
+                            Signaled
                             Result
                             Pid
                             StartAt
@@ -155,6 +156,13 @@ if report.exitCode and (hasValue(items, 'all') or hasValue(items, 'ExitCode'))th
     })
 end
 
+if report.signaled and (hasValue(items, 'all') or hasValue(items, 'Signaled'))then
+    table.insert(fields, {
+        title = "Signaled",
+        value = report.signaled,
+    })
+end
+
 if report.result and (hasValue(items, 'all') or hasValue(items, 'Result'))then
     table.insert(fields, {
         title = "Result",
@@ -216,7 +224,7 @@ local msg = json.encode({
     },
 })
 
-local resp, err = http.post(url, {
+local resp, err = httpclient.post(url, {
     headers = {
         ['Content-type'] = "application/json"
     },
