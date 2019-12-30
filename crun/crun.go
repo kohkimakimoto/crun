@@ -10,6 +10,7 @@ import (
 	"github.com/kballard/go-shellquote"
 	"github.com/kohkimakimoto/crun/structs"
 	"golang.org/x/sync/errgroup"
+	"github.com/lestrrat-go/strftime"
 	"io"
 	"io/ioutil"
 	"os"
@@ -79,7 +80,12 @@ func (c *Crun) Run() (*structs.Report, error) {
 
 	var logWriter io.Writer
 	if c.Config.LogFile != "" {
-		f, err := os.OpenFile(c.Config.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+		logfile, err := strftime.Format(c.Config.LogFile, time.Now())
+		if err != nil {
+			return c.handleErrorBeforeRunning(r, err, nil)
+		}
+
+		f, err := os.OpenFile(logfile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
 			return c.handleErrorBeforeRunning(r, err, nil)
 		}

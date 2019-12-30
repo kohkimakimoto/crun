@@ -88,7 +88,7 @@ Options:
   --post <handler>                 Set post handler. This option can be set multi time.
 
   (Logging)
-  --log-file <path>                The file path to write merged output.
+  --log-file <path>                The file path to write merged output. The strftime format like '%Y%m%d.log' is available.
   --log-prefix <string>            The prefix for the merged output log. This option is used with '--log-file' option.
   -q, --quiet                      Suppress outputting to stdout.
 
