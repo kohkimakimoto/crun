@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -62,18 +63,14 @@ func (c *Crun) Run() (*structs.Report, error) {
 	// create tmp directory
 	if _, err := os.Stat(c.Config.Tmpdir); os.IsNotExist(err) {
 		defaultUmask := syscall.Umask(0)
-		os.MkdirAll(c.Config.Tmpdir, 0777)
+		if err := os.MkdirAll(c.Config.Tmpdir, 0777); err != nil {
+			return c.handleErrorBeforeRunning(r, err, nil)
+		}
 		syscall.Umask(defaultUmask)
 	}
 
 	if c.Config.Quiet {
 		c.StdoutWriter = ioutil.Discard
-	}
-
-	if c.Config.WorkingDirectory != "" {
-		if err := os.Chdir(c.Config.WorkingDirectory); err != nil {
-			return r, fmt.Errorf("couldn't change working directory to '%s': %s.", c.Config.WorkingDirectory, err.Error())
-		}
 	}
 
 	for k, v := range c.Config.EnvironmentMap {
@@ -84,8 +81,7 @@ func (c *Crun) Run() (*structs.Report, error) {
 	if c.Config.LogFile != "" {
 		f, err := os.OpenFile(c.Config.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
-			c.handleErrorBeforeRunning(r, err, nil)
-			return r, err
+			return c.handleErrorBeforeRunning(r, err, nil)
 		}
 
 		logWriter = newLogWriter(f, c)
@@ -98,24 +94,36 @@ func (c *Crun) Run() (*structs.Report, error) {
 
 	if c.Config.WithoutOverlapping {
 		if err := c.lockForWithoutOverlapping(); err != nil {
-			c.handleErrorBeforeRunning(r, err, []string{"CRUN_OVERLAPPING=1"})
-			return r, err
+			return c.handleErrorBeforeRunning(r, err, []string{"CRUN_OVERLAPPING=1"})
 		}
 		defer c.unlockForWithoutOverlapping()
 	}
 
+	uid, gid, err := c.getUidAndGid()
+	if err != nil {
+		return c.handleErrorBeforeRunning(r, err, nil)
+	}
+
 	cmd := exec.Command(c.CommandArgs[0], c.CommandArgs[1:]...)
 	cmd.Stdin = os.Stdin
+
+	if os.Getuid() == 0 {
+		cmd.SysProcAttr = &syscall.SysProcAttr{}
+		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
+	}
+
+	if c.Config.WorkingDirectory != "" {
+		cmd.Dir = c.Config.WorkingDirectory
+	}
+
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		c.handleErrorBeforeRunning(r, err, nil)
-		return r, err
+		return c.handleErrorBeforeRunning(r, err, nil)
 	}
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
 		stdoutPipe.Close()
-		c.handleErrorBeforeRunning(r, err, nil)
-		return r, err
+		return c.handleErrorBeforeRunning(r, err, nil)
 	}
 
 	var bufStdout bytes.Buffer
@@ -127,16 +135,14 @@ func (c *Crun) Run() (*structs.Report, error) {
 
 	// run pre handlers
 	if err := c.runPreHandlers(r, nil); err != nil {
-		c.handleErrorBeforeRunning(r, err, nil)
-		return r, err
+		return c.handleErrorBeforeRunning(r, err, nil)
 	}
 
 	r.StartAt = now()
 	if err := cmd.Start(); err != nil {
 		stderrPipe.Close()
 		stdoutPipe.Close()
-		c.handleErrorBeforeRunning(r, err, nil)
-		return r, err
+		return c.handleErrorBeforeRunning(r, err, nil)
 	}
 	if cmd.Process != nil {
 		r.Pid = cmd.Process.Pid
@@ -201,21 +207,50 @@ func (c *Crun) Run() (*structs.Report, error) {
 	return r, nil
 }
 
+func (c *Crun) getUidAndGid() (int, int, error) {
+	var uid, gid int
+	if c.Config.User != "" {
+		u, err := LookupUserStruct(c.Config.User)
+		if err != nil {
+			return -1, -1, err
+		}
+
+		uid, err = strconv.Atoi(u.Uid)
+		if err != nil {
+			return -1, -1, err
+		}
+
+		gid, err = strconv.Atoi(u.Gid)
+		if err != nil {
+			return -1, -1, err
+		}
+	} else {
+		uid = os.Getuid()
+		gid = os.Getgid()
+	}
+
+	if c.Config.Group != "" {
+		id, err := LookupGroup(c.Config.Group)
+		if err != nil {
+			return -1, -1, err
+		}
+		gid = id
+	}
+
+	return uid, gid, nil
+}
+
 func (c *Crun) handleError(err error) {
 	c.StderrWriter.Write([]byte(err.Error() + "\n"))
 }
 
-func (c *Crun) handleErrorBeforeRunning(r *structs.Report, err error, customEnv []string) {
+func (c *Crun) handleErrorBeforeRunning(r *structs.Report, err error, customEnv []string) (*structs.Report, error) {
 	r.ExitCode = -1
 	r.Result = fmt.Sprintf("failed to execute command: %v", err)
-
 	if err := c.runFailureHandlers(r, customEnv); err != nil {
 		c.handleError(err)
 	}
-
-	if err := c.runPostHandlers(r, customEnv); err != nil {
-		c.handleError(err)
-	}
+	return r, err
 }
 
 func (c *Crun) runPreHandlers(r *structs.Report, customEnv []string) error {

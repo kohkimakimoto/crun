@@ -46,7 +46,7 @@ I implemented some handlers. Please see [handlers](https://github.com/kohkimakim
 
 Crun supports several hook points: `pre`, `notice`, `success`, `failure` and `post`. The following table defines execution sequence:
 
-1. Run `pre` handlers. If they finish with error, it skips running the command and `notice` handlers.
+1. Run `pre` handlers.
 2. Start the command
 3. Run `notice` handlers (non-blocking)
 4. Wait to finish the command

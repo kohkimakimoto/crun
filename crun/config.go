@@ -24,6 +24,8 @@ type Config struct {
 	Environment        []string          `toml:"environments"`
 	EnvironmentMap     map[string]string `toml:"-"`
 	WithoutOverlapping bool              `toml:"without_overlapping"`
+	User               string            `toml:"user"`
+	Group              string            `toml:"group"`
 }
 
 func newConfig() *Config {

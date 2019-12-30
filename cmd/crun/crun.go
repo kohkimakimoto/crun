@@ -32,7 +32,7 @@ func realMain() (status int) {
 
 	// parse flags...
 	var optVersion, optQuiet, optLua, optWithoutOverlapping bool
-	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optTmpdir string
+	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optTmpdir, optUser, optGroup string
 	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
 
 	flag.StringVar(&optTag, "t", "", "")
@@ -44,6 +44,8 @@ func realMain() (status int) {
 	flag.StringVar(&optLogFile, "log-file", "", "")
 	flag.StringVar(&optLogPrefix, "log-prefix", "", "")
 	flag.StringVar(&optTmpdir, "tmpdir", "", "")
+	flag.StringVar(&optUser, "user", "", "")
+	flag.StringVar(&optGroup, "group", "", "")
 	flag.Var(&optEnv, "e", "")
 	flag.Var(&optEnv, "env", "")
 	flag.BoolVar(&optVersion, "v", false, "")
@@ -74,6 +76,8 @@ Options:
   -t, --tag <string>               Arbitrary tag of the job.
   -w, --working-directory <dir>    If specified, use the given directory as working directory. 
   -e, --env <KEY=VALUE>            Set custom environment variables. ex) -e KEY=VALUE
+  --user <user>                    Set execution user
+  --group <user>                   Set execution group
   
   (Handlers)
   --pre <handler>                  Set pre handler. This option can be set multi time.
@@ -169,6 +173,12 @@ Options:
 	}
 	if optTmpdir != "" {
 		c.Config.Tmpdir = optTmpdir
+	}
+	if optUser != "" {
+		c.Config.User = optUser
+	}
+	if optGroup != "" {
+		c.Config.Group = optGroup
 	}
 	if len(optEnv) > 0 {
 		c.Config.Environment = append(c.Config.Environment, optEnv...)
