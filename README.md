@@ -3,10 +3,10 @@
 Crun (Command-RUN) is a command execution wrapper. It is a simple command that is used with another command.
 Crun provides several useful features for your command execution.
 
-* **Hooks:**
-* **Logging:**
-* **Preventing Overlaps:**
-* **Environment Variables:**
+* **Hooks** 
+* **Logging**
+* **Preventing Overlaps**
+* **Environment Variables**
 
 Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), and It has been heavily modified.
 
@@ -20,6 +20,7 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
   - [Execution Sequence](#execution-sequence)
   - [Logging](#logging)
   - [Preventing Overlaps](#preventing-overlaps)
+  - [Environment Variables](#environment-variables)
 - [Config](#config)
 - [Lua Interpreter](#lua-interpreter)
   - [Example](#example-1)
@@ -110,6 +111,14 @@ If you use `--without-overlapping`, Crun prevent to overlap the command executio
 
 ```
 $ crun --without-overlapping -- /path/to/yourcommand [...]
+```
+
+### Environment Variables
+
+You can specify the environment variables with such as `KEY=VALUE` format.
+
+```
+$ crun -e "KEY=VALUE" -- /path/to/yourcommand [...]
 ```
 
 ## Config
