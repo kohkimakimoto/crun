@@ -114,7 +114,22 @@ $ crun --without-overlapping -- /path/to/yourcommand [...]
 
 ## Config
 
-TODO
+Instead of specifying command line options, You can use config file with `-c` option.
+
+Example:
+
+```toml
+post = [
+  "/path/to/posthandler",
+]
+log_file = "/path/to/logfile.log"
+```
+
+You can use the config file like the following:
+
+```
+$ crun -c /path/to/config.toml -- /path/to/yourcommand [...]
+```
 
 ## Lua Interpreter
 
