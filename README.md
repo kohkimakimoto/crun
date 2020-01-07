@@ -3,11 +3,11 @@
 Crun (Command-RUN) is a command execution wrapper. It is a simple command that is used with another command.
 Crun provides several useful features for your command execution as the following.
 
-* **Hooks**
-* **Logging**
-* **Timeout**
-* **Preventing Overlaps**
-* **Environment Variables**
+* **Hooks**: You can run arbitrary script before and after a command execution for notifications.
+* **Logging**: Crun supports logging STDOUT and STDERR to a file.
+* **Timeout**: Crun terminates the command when the timeout elapses.
+* **Preventing Overlaps**: Crun prevents to overlap the command execution.
+* **Environment Variables**: You can specify the environment variables.
 
 Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), and It has been heavily modified.
 
@@ -114,7 +114,7 @@ $ crun --timeout 10 -- /path/to/yourcommand
 
 ### Preventing Overlaps
 
-If you use `--without-overlapping`, Crun prevent to overlap the command execution.
+If you use `--without-overlapping`, Crun prevents to overlap the command execution.
 
 ```
 $ crun --without-overlapping -- /path/to/yourcommand [...]
