@@ -1,9 +1,9 @@
 # Crun <!-- omit in toc -->
 
 Crun (Command-RUN) is a command execution wrapper. It is a simple command that is used with another command.
-Crun provides several useful features for your command execution.
+Crun provides several useful features for your command execution as the following.
 
-* **Hooks** 
+* **Hooks**
 * **Logging**
 * **Preventing Overlaps**
 * **Environment Variables**
