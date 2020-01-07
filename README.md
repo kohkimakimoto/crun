@@ -3,7 +3,7 @@
 Crun (Command-RUN) is a command execution wrapper. It is a simple command that is used with another command.
 Crun provides several useful features for your command execution as the following.
 
-* **Hook Handlers**: You can run arbitrary scripts before and after a command execution for notifications.
+* **Hook Handlers**: You can run arbitrary scripts before and after a command execution. It is useful for notifications.
 * **Logging**: Crun supports logging STDOUT and STDERR to a file.
 * **Timeout**: Crun terminates the command when the timeout elapses.
 * **Preventing Overlaps**: Crun prevents to overlap the command execution.
