@@ -177,6 +177,9 @@ func (c *Crun) Run() (*structs.Report, error) {
 	if c.Config.Timeout > 0 {
 		done := make(chan error)
 		go func() {
+			if err := eg.Wait(); err != nil {
+				c.handleError(err)
+			}
 			done <- cmd.Wait()
 		}()
 
@@ -193,11 +196,10 @@ func (c *Crun) Run() (*structs.Report, error) {
 			defer close(done)
 		}
 	} else {
+		if err := eg.Wait(); err != nil {
+			c.handleError(err)
+		}
 		err = cmd.Wait()
-	}
-
-	if err := eg.Wait(); err != nil {
-		c.handleError(err)
 	}
 
 	r.EndAt = now()
