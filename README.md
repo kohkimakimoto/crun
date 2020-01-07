@@ -5,6 +5,7 @@ Crun provides several useful features for your command execution as the followin
 
 * **Hooks**
 * **Logging**
+* **Timeout**
 * **Preventing Overlaps**
 * **Environment Variables**
 
@@ -18,6 +19,7 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
   - [Result JSON](#result-json)
   - [Execution Sequence](#execution-sequence)
   - [Logging](#logging)
+  - [Timeout](#timeout)
   - [Preventing Overlaps](#preventing-overlaps)
   - [Environment Variables](#environment-variables)
 - [Config](#config)
@@ -100,6 +102,14 @@ Crun supports logging STDOUT and STDERR to a file.
 
 ```
 $ crun --log-file /var/log/file.log -- /path/to/yourcommand
+```
+
+### Timeout
+
+If you use `--timeout` option, Crun terminates the command when the timeout elapses.
+
+```
+$ crun --timeout 10 -- /path/to/yourcommand
 ```
 
 ### Preventing Overlaps
