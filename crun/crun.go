@@ -9,8 +9,8 @@ import (
 	"github.com/Songmu/wrapcommander"
 	"github.com/kballard/go-shellquote"
 	"github.com/kohkimakimoto/crun/structs"
-	"golang.org/x/sync/errgroup"
 	"github.com/lestrrat-go/strftime"
+	"golang.org/x/sync/errgroup"
 	"io"
 	"io/ioutil"
 	"os"
@@ -155,9 +155,9 @@ func (c *Crun) Run() (*structs.Report, error) {
 	}
 
 	// run notice handlers
-	done := make(chan error)
+	noticeHandlersDone := make(chan error)
 	go func() {
-		done <- c.runNoticeHandlers(r, nil)
+		noticeHandlersDone <- c.runNoticeHandlers(r, nil)
 	}()
 
 	eg := &errgroup.Group{}
@@ -173,11 +173,33 @@ func (c *Crun) Run() (*structs.Report, error) {
 		return err
 	})
 
+	envForHandler := []string{}
+	if c.Config.Timeout > 0 {
+		done := make(chan error)
+		go func() {
+			done <- cmd.Wait()
+		}()
+
+		select {
+		case <-time.After(time.Duration(c.Config.Timeout) * time.Second):
+			if err := cmd.Process.Kill(); err != nil {
+				c.handleError(fmt.Errorf("failed to kill: " + err.Error()))
+			}
+			err = fmt.Errorf("crun terminated the command. it took time over %d sec", c.Config.Timeout)
+			c.handleError(err)
+
+			envForHandler = append(envForHandler, fmt.Sprintf("CRUN_TIMEOUT=%d", c.Config.Timeout))
+		case err = <-done:
+			defer close(done)
+		}
+	} else {
+		err = cmd.Wait()
+	}
+
 	if err := eg.Wait(); err != nil {
 		c.handleError(err)
 	}
 
-	err = cmd.Wait()
 	r.EndAt = now()
 	es := wrapcommander.ResolveExitStatus(err)
 	r.ExitCode = es.ExitCode()
@@ -209,7 +231,7 @@ func (c *Crun) Run() (*structs.Report, error) {
 		c.handleError(err)
 	}
 
-	<-done
+	<-noticeHandlersDone
 	return r, nil
 }
 
@@ -256,6 +278,10 @@ func (c *Crun) handleErrorBeforeRunning(r *structs.Report, err error, customEnv 
 	if err := c.runFailureHandlers(r, customEnv); err != nil {
 		c.handleError(err)
 	}
+	if err := c.runPostHandlers(r, customEnv); err != nil {
+		c.handleError(err)
+	}
+
 	return r, err
 }
 

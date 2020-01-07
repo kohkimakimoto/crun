@@ -26,6 +26,7 @@ type Config struct {
 	WithoutOverlapping bool              `toml:"without_overlapping"`
 	User               string            `toml:"user"`
 	Group              string            `toml:"group"`
+	Timeout            int64             `toml:"timeout"`
 }
 
 func newConfig() *Config {
@@ -39,6 +40,7 @@ func newConfig() *Config {
 		Mutexdir:           DefaultMutexdir,
 		EnvironmentMap:     map[string]string{},
 		WithoutOverlapping: false,
+		Timeout:            0,
 	}
 }
 func (c *Config) LoadConfigFile(path string) error {
