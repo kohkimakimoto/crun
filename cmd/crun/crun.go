@@ -33,6 +33,7 @@ func realMain() (status int) {
 	// parse flags...
 	var optVersion, optQuiet, optLua, optWithoutOverlapping bool
 	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optMutexdir, optMutex, optUser, optGroup string
+	var optTimeout int64
 	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
 
 	flag.StringVar(&optTag, "t", "", "")
@@ -54,6 +55,7 @@ func realMain() (status int) {
 	flag.BoolVar(&optQuiet, "q", false, "")
 	flag.BoolVar(&optQuiet, "quiet", false, "")
 	flag.BoolVar(&optWithoutOverlapping, "without-overlapping", false, "")
+	flag.Int64Var(&optTimeout, "timeout", 0, "")
 	flag.Var(&optPre, "pre", "")
 	flag.Var(&optNotice, "notice", "")
 	flag.Var(&optSuccess, "success", "")
@@ -96,6 +98,9 @@ Options:
   --without-overlapping            Prevent overlapping execution the job.
   --mutexdir <dir>                 The directory path to store job mutex files. (default: /tmp/crun)
   --mutex <string>                 Overriding the mutex id.
+
+  (Timeout)
+  --timeout <number>               The command is terminated when the timeout elapses. The unit is second.
 
   (Help)
   -h, --help                       Show help.
@@ -187,6 +192,9 @@ Options:
 	}
 	if len(optEnv) > 0 {
 		c.Config.Environment = append(c.Config.Environment, optEnv...)
+	}
+	if optTimeout > 0 {
+		c.Config.Timeout = optTimeout
 	}
 
 	r, err := c.Run()
