@@ -3,7 +3,7 @@
 Crun (Command-RUN) is a command execution wrapper. It is a simple command that is used with another command.
 Crun provides several useful features for your command execution as the following.
 
-* **Hooks**: You can run arbitrary scripts before and after a command execution for notifications.
+* **Hook Handlers**: You can run arbitrary scripts before and after a command execution for notifications.
 * **Logging**: Crun supports logging STDOUT and STDERR to a file.
 * **Timeout**: Crun terminates the command when the timeout elapses.
 * **Preventing Overlaps**: Crun prevents to overlap the command execution.
@@ -15,7 +15,7 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
 
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Handlers](#handlers)
+  - [Hook Handlers](#hook-handlers)
   - [Result JSON](#result-json)
   - [Execution Sequence](#execution-sequence)
   - [Logging](#logging)
@@ -46,9 +46,9 @@ Helloworld!
 post handler detected the command exited with: 0
 ```
 
-### Handlers
+### Hook Handlers
 
-Crun runs arbitrary commands with some hook handlers. In the following example, it appends a post handler which is executed when your command finish.
+Crun runs arbitrary scripts with some hook handlers. In the following example, it appends a post handler which is executed when your command finish.
 
 ```
 $ crun --post /path/to/posthandler.sh -- /path/to/yourcommand [...]
