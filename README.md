@@ -14,6 +14,7 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
 ## Table of Contents <!-- omit in toc -->
 
 - [Installation](#installation)
+- [Options](#options)
 - [Usage](#usage)
   - [Hook Handlers](#hook-handlers)
     - [Result JSON](#result-json)
@@ -36,6 +37,54 @@ Crun is provided as a single binary. You can download it on Github releases page
 
 If you use CentOS7, you can also use RPM package that is stored in the same releases page.
 
+## Options
+
+You can see the all command line options by executing `crun -h`:
+
+```
+Usage: crun [OPTIONS...] <COMMAND...>
+
+crun -- Command execution wrapper.
+version 0.5.0 (72db05e318c40c4e95da0cac5d91d6724f2d37ba)
+
+Copyright (c) Kohki Makimoto <kohki.makimoto@gmail.com>
+The MIT License (MIT)
+
+Options:
+  (General)
+  -c. --config-file <path>         Load config from the file.
+  -t, --tag <string>               Set a tag of the job.
+  -w, --working-directory <dir>    If specified, use the given directory as working directory. 
+  -e, --env <KEY=VALUE>            Set custom environment variables. ex) -e KEY=VALUE
+  --user <user>                    Set an execution user
+  --group <group>                  Set an execution group
+  
+  (Handlers)
+  --pre <handler>                  Set pre handler. This option can be set multi time.
+  --notice <handler>               Set notice handler. This option can be set multi time.
+  --success <handler>              Set success handler. This option can be set multi time.
+  --failure <handler>              Set failure handler. This option can be set multi time.
+  --post <handler>                 Set post handler. This option can be set multi time.
+
+  (Logging)
+  --log-file <path>                The file path to write merged output. The strftime format like '%Y%m%d.log' is available.
+  --log-prefix <string>            The prefix for the merged output log. This option is used with '--log-file' option.
+  -q, --quiet                      Suppress outputting to stdout.
+
+  (Overlapping)
+  --without-overlapping            Prevent overlapping execution the job.
+  --mutexdir <dir>                 The directory path to store job mutex files. (default: /tmp/crun)
+  --mutex <string>                 Overriding the mutex id.
+
+  (Timeout)
+  --timeout <number>               The command is terminated when the timeout elapses. The unit is second.
+
+  (Help)
+  -h, --help                       Show help.
+  -v, --version                    Print the version.
+```
+
+
 ## Usage
 
 In the following example, Crun prints command's exit code by using a post handler. Try it out!
@@ -48,7 +97,7 @@ post handler detected the command exited with: 0
 
 ### Hook Handlers
 
-Crun runs arbitrary scripts with some hook handlers. In the following example, it appends a post handler which is executed when your command finish.
+Crun runs arbitrary scripts with some hook handlers. In the following example, it appends a post handler which is executed when your command finishes.
 
 ```
 $ crun --post /path/to/posthandler.sh -- /path/to/yourcommand [...]
