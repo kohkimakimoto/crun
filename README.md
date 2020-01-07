@@ -16,8 +16,8 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
 - [Installation](#installation)
 - [Usage](#usage)
   - [Hook Handlers](#hook-handlers)
-  - [Result JSON](#result-json)
-  - [Execution Sequence](#execution-sequence)
+    - [Result JSON](#result-json)
+    - [Execution Sequence](#execution-sequence)
   - [Logging](#logging)
   - [Timeout](#timeout)
   - [Preventing Overlaps](#preventing-overlaps)
@@ -56,7 +56,7 @@ $ crun --post /path/to/posthandler.sh -- /path/to/yourcommand [...]
 
 I implemented some handlers. Please see [handlers](https://github.com/kohkimakimoto/crun/tree/master/handlers) directory.
 
-### Result JSON
+#### Result JSON
 
 The all handlers accept a result JSON via STDIN, that reports command result like the following.
 
@@ -85,7 +85,7 @@ The all handlers accept a result JSON via STDIN, that reports command result lik
 
 It is compatible with [horenso result JSON](https://github.com/Songmu/horenso#result-json).
 
-### Execution Sequence
+#### Execution Sequence
 
 Crun supports several hook points: `pre`, `notice`, `success`, `failure` and `post`. The following table defines execution sequence:
 
@@ -158,7 +158,7 @@ You can implement Crun handlers in any programming languages you like. But crun 
 
 ```lua
 #!/bin/sh
-_=[[ 
+_=[[
 exec crun --lua "$0" "$@"
 ]]
 
