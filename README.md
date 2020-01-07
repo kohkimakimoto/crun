@@ -14,7 +14,6 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
 
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Example](#example)
   - [Handlers](#handlers)
   - [Result JSON](#result-json)
   - [Execution Sequence](#execution-sequence)
@@ -23,7 +22,7 @@ Crun is based on a fork of [Songmu/horenso](https://github.com/Songmu/horenso), 
   - [Environment Variables](#environment-variables)
 - [Config](#config)
 - [Lua Interpreter](#lua-interpreter)
-  - [Example](#example-1)
+  - [Example](#example)
 - [Author](#author)
 - [License](#license)
 
@@ -36,8 +35,6 @@ Crun is provided as a single binary. You can download it on Github releases page
 If you use CentOS7, you can also use RPM package that is stored in the same releases page.
 
 ## Usage
-
-### Example
 
 In the following example, Crun prints command's exit code by using a post handler. Try it out!
 
