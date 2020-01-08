@@ -210,7 +210,7 @@ You can implement Crun handlers in any programming languages you like. But crun 
 _=[[
 exec crun --lua "$0" "$@"
 ]]
-
+local json = require "json"
 local report = json.decode(io.read("*a"))
 print(report.command)
 ```
