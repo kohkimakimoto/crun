@@ -77,11 +77,11 @@ Options:
   (General)
   -c. --config-file <path>         Load config from the file.
   -t, --tag <string>               Set a tag of the job.
-  -w, --working-directory <dir>    If specified, use the given directory as working directory. 
+  -w, --working-directory <dir>    If specified, use the given directory as working directory.
   -e, --env <KEY=VALUE>            Set custom environment variables. ex) -e KEY=VALUE
   --user <user>                    Set an execution user
   --group <group>                  Set an execution group
-  
+
   (Hook Handlers)
   --pre <handler>                  Set a pre handler. This option can be set multi time.
   --notice <handler>               Set a notice handler. This option can be set multi time.

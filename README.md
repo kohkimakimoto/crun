@@ -45,7 +45,7 @@ You can see the all command line options by executing `crun -h`:
 Usage: crun [OPTIONS...] <COMMAND...>
 
 crun -- Command execution wrapper.
-version 0.5.0 (72db05e318c40c4e95da0cac5d91d6724f2d37ba)
+version 0.6.0 (642b405c8ce21b9ad1ecc98a6895f37bc929efc5)
 
 Copyright (c) Kohki Makimoto <kohki.makimoto@gmail.com>
 The MIT License (MIT)
@@ -54,17 +54,17 @@ Options:
   (General)
   -c. --config-file <path>         Load config from the file.
   -t, --tag <string>               Set a tag of the job.
-  -w, --working-directory <dir>    If specified, use the given directory as working directory. 
+  -w, --working-directory <dir>    If specified, use the given directory as working directory.
   -e, --env <KEY=VALUE>            Set custom environment variables. ex) -e KEY=VALUE
   --user <user>                    Set an execution user
   --group <group>                  Set an execution group
-  
-  (Handlers)
-  --pre <handler>                  Set pre handler. This option can be set multi time.
-  --notice <handler>               Set notice handler. This option can be set multi time.
-  --success <handler>              Set success handler. This option can be set multi time.
-  --failure <handler>              Set failure handler. This option can be set multi time.
-  --post <handler>                 Set post handler. This option can be set multi time.
+
+  (Hook Handlers)
+  --pre <handler>                  Set a pre handler. This option can be set multi time.
+  --notice <handler>               Set a notice handler. This option can be set multi time.
+  --success <handler>              Set a success handler. This option can be set multi time.
+  --failure <handler>              Set a failure handler. This option can be set multi time.
+  --post <handler>                 Set a post handler. This option can be set multi time.
 
   (Logging)
   --log-file <path>                The file path to write merged output. The strftime format like '%Y%m%d.log' is available.
