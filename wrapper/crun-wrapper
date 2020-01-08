@@ -12,4 +12,4 @@ if [ "${TERM:-dumb}" = "dumb" ]; then
   options="--quiet"
 fi
 
-exec crun -c=/etc/crun/crun.toml $@
+exec crun -c=/etc/crun/crun.toml $options "$@"

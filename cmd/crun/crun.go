@@ -82,12 +82,12 @@ Options:
   --user <user>                    Set an execution user
   --group <group>                  Set an execution group
   
-  (Handlers)
-  --pre <handler>                  Set pre handler. This option can be set multi time.
-  --notice <handler>               Set notice handler. This option can be set multi time.
-  --success <handler>              Set success handler. This option can be set multi time.
-  --failure <handler>              Set failure handler. This option can be set multi time.
-  --post <handler>                 Set post handler. This option can be set multi time.
+  (Hook Handlers)
+  --pre <handler>                  Set a pre handler. This option can be set multi time.
+  --notice <handler>               Set a notice handler. This option can be set multi time.
+  --success <handler>              Set a success handler. This option can be set multi time.
+  --failure <handler>              Set a failure handler. This option can be set multi time.
+  --post <handler>                 Set a post handler. This option can be set multi time.
 
   (Logging)
   --log-file <path>                The file path to write merged output. The strftime format like '%Y%m%d.log' is available.
