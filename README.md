@@ -201,7 +201,7 @@ $ crun -c /path/to/config.toml -- /path/to/yourcommand [...]
 
 ## Lua Interpreter
 
-You can implement Crun handlers in any programming languages you like. But crun has built-in Lua interpreter to implement handlers without dependences.
+You can implement Crun handlers in any programming languages you like. But crun has a built-in Lua interpreter to implement handlers without dependences.
 
 ### Example
 
@@ -215,7 +215,7 @@ local report = json.decode(io.read("*a"))
 print(report.command)
 ```
 
-The first four lines are trick to use [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) to run the script using Crun built-in lua intepreter.
+The first four lines code is a trick to use [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) to run the script using Crun's Lua.
 
 See [crun-handler-slack](https://github.com/kohkimakimoto/crun/tree/master/handlers/crun-handler-slack). It's a good example.
 
