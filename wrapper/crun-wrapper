@@ -5,11 +5,4 @@ if [ $# -lt 1 ]; then
   exit 0
 fi
 
-options=""
-
-# If the terminal is not set, suppress stdout
-if [ "${TERM:-dumb}" = "dumb" ]; then
-  options="--quiet"
-fi
-
-exec crun -c=/etc/crun/crun.toml $options "$@"
+exec crun -c=/etc/crun/crun.toml "$@"
