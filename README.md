@@ -192,7 +192,7 @@ $ crun -e "KEY=VALUE" -- /path/to/yourcommand [...]
 
 ## Config
 
-Instead of specifying command line options, You can use config file with `-c` option.
+Instead of specifying command line options, You can use config file with `-c` option. The config file must be written in [TOML](https://github.com/toml-lang/toml).
 
 Example:
 
