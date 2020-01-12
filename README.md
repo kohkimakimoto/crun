@@ -154,6 +154,18 @@ Crun supports logging STDOUT and STDERR to a file.
 $ crun --log-file /var/log/file.log -- /path/to/yourcommand
 ```
 
+You can also add a prefix to the log lines by using `--log-prefix` option.
+
+```
+$ crun --log-file /var/log/file.log --log--prefix "%time %tag %pid: " -- /path/to/yourcommand
+```
+
+In the log prefix string, you can use the following replacement:
+
+* `%time`: Timestamp.
+* `%tag`: The tag that is specified by `--tag` option.
+* `%pid`: The process id.
+
 ### Timeout
 
 If you use `--timeout` option, Crun terminates the command when the timeout elapses.
