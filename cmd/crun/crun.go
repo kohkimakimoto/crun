@@ -31,7 +31,7 @@ func realMain() (status int) {
 	}()
 
 	// parse flags...
-	var optVersion, optQuiet, optLua, optWithoutOverlapping bool
+	var optVersion, optQuiet, optLua, optWithoutOverlapping, optNoConfig bool
 	var optTag, optWd, optLogFile, optLogPrefix, optConfigFile, optMutexdir, optMutex, optUser, optGroup string
 	var optTimeout int64
 	var optEnv, optPre, optNotice, optSuccess, optFailure, optPost stringSlice
@@ -54,6 +54,8 @@ func realMain() (status int) {
 	flag.BoolVar(&optVersion, "version", false, "")
 	flag.BoolVar(&optQuiet, "q", false, "")
 	flag.BoolVar(&optQuiet, "quiet", false, "")
+	flag.BoolVar(&optNoConfig, "n", false, "")
+	flag.BoolVar(&optNoConfig, "no-config", false, "")
 	flag.BoolVar(&optWithoutOverlapping, "without-overlapping", false, "")
 	flag.Int64Var(&optTimeout, "timeout", 0, "")
 	flag.Var(&optPre, "pre", "")
@@ -75,7 +77,8 @@ The MIT License (MIT)
 
 Options:
   (General)
-  -c. --config-file <path>         Load config from the file.
+  -c, --config-file <path>         Load config from the file.
+  -n, --no-config                  No config file will be used
   -t, --tag <string>               Set a tag of the job.
   -w, --working-directory <dir>    If specified, use the given directory as working directory.
   -e, --env <KEY=VALUE>            Set custom environment variables. ex) -e KEY=VALUE
@@ -139,9 +142,11 @@ Options:
 	c := crun.New()
 	defer c.Close()
 
-	if err := loadConfigFile(c, optConfigFile); err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
-		return 1
+	if !optNoConfig {
+		if err := loadConfigFile(c, optConfigFile); err != nil {
+			fmt.Fprintf(os.Stderr, "%v", err)
+			return 1
+		}
 	}
 
 	c.CommandArgs = flag.Args()
