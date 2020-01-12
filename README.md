@@ -45,14 +45,15 @@ You can see the all command line options by executing `crun -h`:
 Usage: crun [OPTIONS...] <COMMAND...>
 
 crun -- Command execution wrapper.
-version 0.6.0 (642b405c8ce21b9ad1ecc98a6895f37bc929efc5)
+version 0.8.0 (a21875bc6deb21e0f006b2e999504b173af51397)
 
 Copyright (c) Kohki Makimoto <kohki.makimoto@gmail.com>
 The MIT License (MIT)
 
 Options:
   (General)
-  -c. --config-file <path>         Load config from the file.
+  -c, --config-file <path>         Load config from the file.
+  -n, --no-config                  No config file will be used
   -t, --tag <string>               Set a tag of the job.
   -w, --working-directory <dir>    If specified, use the given directory as working directory.
   -e, --env <KEY=VALUE>            Set custom environment variables. ex) -e KEY=VALUE
@@ -184,13 +185,25 @@ Instead of specifying command line options, You can use config file with `-c` op
 Example:
 
 ```toml
+pre = []
+
+notice = []
+
+success = []
+
+failure = []
+
 post = [
   "/path/to/posthandler",
 ]
+
 environment = [
   "KEY=VALUE"
 ]
+
 log_file = "/path/to/logfile.log"
+
+log_prefix = "%time %tag %pid: "
 ```
 
 You can use the config file like the following:
