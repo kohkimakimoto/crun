@@ -1,6 +1,6 @@
 # Crun <!-- omit in toc -->
 
-Crun (Command-RUN) is a command execution wrapper. It is a simple command that is used with another command.
+Crun (Command-RUN) is a command execution wrapper. It is used with an another command that you want to execute.
 Crun provides several useful features for your command execution as the following.
 
 * **Hook Handlers**: You can run arbitrary scripts before and after a command execution. It is useful for notifications.
@@ -226,7 +226,7 @@ $ crun -c /path/to/config.toml -- /path/to/yourcommand [...]
 
 ## Lua Interpreter
 
-You can implement Crun handlers in any programming languages you like. But crun has a built-in Lua interpreter to implement handlers without dependences.
+You can implement Crun handlers in any programming languages you like. But Crun has a built-in Lua interpreter to implement handlers without additional dependences.
 
 ### Example
 
@@ -235,6 +235,7 @@ You can implement Crun handlers in any programming languages you like. But crun 
 _=[[
 exec crun --lua "$0" "$@"
 ]]
+
 local json = require "json"
 local report = json.decode(io.read("*a"))
 print(report.command)
