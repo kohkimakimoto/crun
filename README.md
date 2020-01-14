@@ -224,6 +224,25 @@ You can use the config file like the following:
 $ crun -c /path/to/config.toml -- /path/to/yourcommand [...]
 ```
 
+It is usuful to use a wrapper script to load default config file. see the following example:
+
+```bash
+#!/usr/bin/env bash
+
+if [ $# -lt 1 ]; then
+  crun
+  exit 0
+fi
+
+exec crun -c=/etc/crun/crun.toml "$@"
+```
+
+You can use this script like the following:
+
+```
+$ crun-wrapper -- /path/to/yourcommand [...]
+```
+
 ## Lua Interpreter
 
 You can implement Crun handlers in any programming languages you like. But Crun has a built-in Lua interpreter to implement handlers without additional dependences.
