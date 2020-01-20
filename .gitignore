@@ -6,7 +6,7 @@ Thumbs.db
 .vscode/
 node_modules/
 
-.go-packages/
+.go-tools/
 /_tmp
 /_work
 /.vagrant

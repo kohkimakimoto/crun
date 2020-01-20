@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 export GO111MODULE := on
-export PATH := $(CURDIR)/.go-packages/bin:$(PATH)
+export PATH := $(CURDIR)/.go-tools/bin:$(PATH)
 
 # This is a magic code to output help message at default
 # see https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -43,15 +43,14 @@ packaging: ## Create packages (now support RPM only)
 
 .PHONY: installtools
 installtools: ## Install dev tools
-	GOPATH=$(CURDIR)/.go-packages && \
+	GO111MODULE=off && GOPATH=$(CURDIR)/.go-tools && \
       go get github.com/mitchellh/gox && \
       go get github.com/axw/gocov/gocov && \
-      go get github.com/matm/gocov-html && \
-      go clean -modcache
+      go get github.com/matm/gocov-html
 
 .PHONY: cleantools
 cleantools:
-	GOPATH=$(CURDIR)/.go-packages && go clean -modcache && rm -rf $(CURDIR)/.go-packages
+	GO111MODULE=off && GOPATH=$(CURDIR)/.go-tools && rm -rf $(CURDIR)/.go-tools
 
 .PHONY:deps
 deps: ## Install dependences.
