@@ -47,6 +47,8 @@ installtools: ## Install dev tools
       go get github.com/mitchellh/gox && \
       go get github.com/axw/gocov/gocov && \
       go get github.com/matm/gocov-html
+	rm -rf $(CURDIR)/.go-tools/pkg
+	rm -rf $(CURDIR)/.go-tools/src
 
 .PHONY: cleantools
 cleantools:
